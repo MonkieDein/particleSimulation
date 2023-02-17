@@ -10,6 +10,7 @@ Region = DataFrame(
 )
 
 # ΔT = Tᵣₓₙ - Tg : Tg = 70
+# default scale = 14 -> nm²/s , set scale = 0 -> cm²/s .
 # logD = ( A - B ⋅ wₚ ) where A = C₁ + ΔT C₃ , and B = C₂ - ΔT C₄
 function log₁₀D( wₚ , ΔT , Region; scale = 14)
     A = Region.C1 .+ ΔT .* Region.C3  
