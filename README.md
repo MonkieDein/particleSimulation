@@ -5,7 +5,7 @@ Simulate particle for Chemistry peoject
 
 #### 1. Download Source Code 
 
-- Goto (document git)[https://github.com/MonkieDein/particleSimulation] > Code > Download ZIP and unzip folder.
+- Goto [document git](https://github.com/MonkieDein/particleSimulation) > Code > Download ZIP and unzip folder.
 
 #### 2. Download julia
 
