@@ -15,7 +15,7 @@ Simulate particle for Chemistry peoject
 
 - When the installation completed select
 
-[\tick] Run julia > Finish
+[-] Run julia > Finish
 
 3. Run julia code
 
