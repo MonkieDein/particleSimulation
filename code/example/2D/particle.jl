@@ -1,4 +1,4 @@
-include("basics.jl")
+include("../../basics.jl")
 # Simulate radical in a particle fixed velocity
 
 particle = Circle(0,0,100)

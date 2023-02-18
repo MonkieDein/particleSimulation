@@ -9,10 +9,10 @@ Region = DataFrame(
     C4 = [ 8.12e-3 ; 0 ; 0 ; 0 ],
 )
 
+# logD = ( A - B ⋅ wₚ ) where A = C₁ + ΔT C₃ , and B = C₂ - ΔT C₄
 # ΔT = Tᵣₓₙ - Tg : Tg = 70
 # default scale = 14 -> nm²/s , set scale = 0 -> cm²/s .
-# logD = ( A - B ⋅ wₚ ) where A = C₁ + ΔT C₃ , and B = C₂ - ΔT C₄
-function log₁₀D( wₚ , ΔT , Region; scale = 14)
+function logD( wₚ , ΔT , Region; scale = 14)
     A = Region.C1 .+ ΔT .* Region.C3  
     B = Region.C2 .- ΔT .* Region.C4 
     # Intersection of wₚ : (aᵢ - aᵢ₊₁)/(bᵢ - bᵢ₊₁) or (aᵢ₊₁ - aᵢ)/(bᵢ₊₁ - bᵢ)
@@ -24,15 +24,14 @@ end
 # Plot Discretization : How fine does each axis has to discretize.
 N = 101
 M = 101
-Wₚ = collect(range(0,1,N))
+Wₚ = collect(range(0,1,N)) # collect turn range to a vectors of values
 ΔT = collect(range(-100,100,M))
 
 # Calculate logD for each combination of Wₚ and ΔT.
-logD = [ [log₁₀D( Wₚ[i] ,ΔT[j],Region, scale = 0)  for i in 1:N ] for j in 1:M]
-logD = reduce(hcat,logD)
+log₁₀D = [ [logD( Wₚ[i] ,ΔT[j],Region, scale = 0)  for i in 1:N ] for j in 1:M]
+log₁₀D = reduce(hcat,log₁₀D) # Turn vector of vector to a 2D Matrices
 
 # Create Figure set resolution, set axis, plot surface.
 fig = Figure(resolution = (1200, 800)) 
 ax = Axis3(fig[1,1:2],xlabel = "Wₚ",ylabel = "ΔT (°C)",zlabel="log₁₀D (cm²/s)")
-surface!(ax,Wₚ,ΔT,logD,color = (:blue,0.05),transparency=true)
-
+surface!(ax,Wₚ,ΔT,log₁₀D,color = (:blue,0.05),transparency=true)

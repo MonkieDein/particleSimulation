@@ -1,4 +1,4 @@
-include("3Dbasics.jl")
+include("../../3Dbasics.jl")
 using DynamicalSystems
 using GeometryBasics
 using GLMakie

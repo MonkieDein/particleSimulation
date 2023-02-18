@@ -1,4 +1,4 @@
-include("basics.jl")
+include("../../basics.jl")
 # Simulate radical in a particle with random walk
 nm = 100
 particle = Circle(0,0,nm)

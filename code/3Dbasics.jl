@@ -72,9 +72,6 @@ function random_direction(obj;size = L2Distance(vec(obj.v),zeros(3)))
     obj.v.z = size * cos(θ)
 end
 
-box = Square(0,0,0,100)
-Rad = Round(0,0,0,3)
-
 function updateMotion(obj,Δt)
     # update position
     obj.p = coord( vec(obj.p) .+ vec(obj.v) .* Δt )

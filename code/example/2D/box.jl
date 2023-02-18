@@ -1,4 +1,4 @@
-include("basics.jl")
+include("../../basics.jl")
 # Simulate radical in a box 
 
 box = Box(0,0,100)
@@ -25,4 +25,4 @@ video = @animate for t in ProgressBar(T)
     end
 end
 
-gif(video,"animation/box.mp4",fps=60)
+gif(video,"animation/2D/box.mp4",fps=60)
