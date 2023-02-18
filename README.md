@@ -25,7 +25,7 @@ Simulate particle for Chemistry peoject
     - import Pkg; Pkg.add("GLMakie")
 
 - Copy each line from editor to run in the julia Apps
-    -PS: plot figure and axis for the first time might takes longer than usual, please be patient.
+    - PS: plot figure and axis for the first time might takes longer than usual, please be patient.
 
 ## Optional preliminary process:
 
@@ -54,7 +54,7 @@ Local path : use default or choose desire %LOCAL_PATH%
 - [Available instruction in youtube](https://www.youtube.com/watch?v=oi5dZxPGNlk&t=204s)
 
 
-### Directory Structure
+## Directory Structure
 - Animation : The mp4 files
 - code : 
     - basics physics code of objects
