@@ -11,14 +11,14 @@ Region = DataFrame(
 
 # logD = ( A - B ⋅ wₚ ) where A = C₁ + ΔT C₃ , and B = C₂ - ΔT C₄
 # ΔT = Tᵣₓₙ - Tg : Tg = 70
-# default scale = 14 -> nm²/s , set scale = 0 -> cm²/s .
-function logD( wₚ , ΔT , Region; scale = 14)
+function logD( wₚ , ΔT , Region; unit = "cm")
+    scale = Dict("m" => -4,"cm" => 0,"nm" => 14)
     A = Region.C1 .+ ΔT .* Region.C3  
     B = Region.C2 .- ΔT .* Region.C4 
     # Intersection of wₚ : (aᵢ - aᵢ₊₁)/(bᵢ - bᵢ₊₁) or (aᵢ₊₁ - aᵢ)/(bᵢ₊₁ - bᵢ)
     RegionMin = [0 ; (A[[1,2,3]] .- A[[2,3,4]]) ./ (B[[1,2,3]] .- B[[2,3,4]])]
     RegionIndex = searchsortedlast(RegionMin,wₚ)
-    return( ( A[RegionIndex] - B[RegionIndex] * wₚ ) + scale)
+    return( ( A[RegionIndex] - B[RegionIndex] * wₚ ) + scale[unit])
 end
 
 # Plot Discretization : How fine does each axis has to discretize.
@@ -28,7 +28,7 @@ Wₚ = collect(range(0,1,N)) # collect turn range to a vectors of values
 ΔT = collect(range(-100,100,M))
 
 # Calculate logD for each combination of Wₚ and ΔT.
-log₁₀D = [ [logD( Wₚ[i] ,ΔT[j],Region, scale = 0)  for i in 1:N ] for j in 1:M]
+log₁₀D = [ [logD( Wₚ[i] ,ΔT[j],Region, unit = "cm")  for i in 1:N ] for j in 1:M]
 log₁₀D = reduce(hcat,log₁₀D) # Turn vector of vector to a 2D Matrices
 
 # Create Figure set resolution, set axis, plot surface.
