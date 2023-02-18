@@ -14,8 +14,8 @@ Simulate particle for Chemistry peoject
 - Click the julia installer and install julia.
 
 - When the installation completed select
-[\tick] Run julia
-> Finish
+
+[\tick] Run julia > Finish
 
 3. Run julia code
 
