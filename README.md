@@ -9,7 +9,7 @@ Simulate particle for Chemistry peoject
 
 #### 2. Download julia
 
-- Install (Julia)[https://julialang.org/downloads/] > Current stable release > select your OS installer
+- Install [Julia](https://julialang.org/downloads/) > Current stable release > select your OS installer
 
 - Click the julia installer and install julia.
 
@@ -31,7 +31,7 @@ Simulate particle for Chemistry peoject
 
 #### 1. Github Desktop : Automatic pull Source Code 
 
-- Installation : (Github desktop)[https://desktop.github.com/] > Download and run the installer
+- Installation : [Github desktop](https://desktop.github.com/) > Download and run the installer
 
 - Sign in : File > Options > Accounts > Sign in > Continue with browser
 
@@ -40,7 +40,7 @@ URL : "https://github.com/MonkieDein/particleSimulation"
 Local path : use default or choose desire %LOCAL_PATH%
 
 #### 2. Add path to environment variable for window
-(Available instruction in youtube)[https://www.youtube.com/watch?v=42OXIbdc7bQ]
+[Available instruction in youtube](https://www.youtube.com/watch?v=42OXIbdc7bQ)
 
 - open Window Start > type"julia" > right click the app icon > open file location > right click the julia icon in the folder > open file location 
 
@@ -51,7 +51,7 @@ Local path : use default or choose desire %LOCAL_PATH%
 
 #### 3. VS code : For developing and running code 
 
-- (Available instruction in youtube)[https://www.youtube.com/watch?v=oi5dZxPGNlk&t=204s]
+- [Available instruction in youtube](https://www.youtube.com/watch?v=oi5dZxPGNlk&t=204s)
 
 
 ### Directory Structure
