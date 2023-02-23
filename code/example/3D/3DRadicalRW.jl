@@ -24,14 +24,7 @@ for (i,t) in ProgressBar(enumerate(T))
         random_direction(rad1)
     end
     tempΔt = Δt
-    while tempΔt > 0
-        colission = checkParticleCollision(particle,rad1,tempΔt)
-        updateMotion(rad1,colission.time * tempΔt)
-        oRadical[] = Sphere(Point3f0(positionTuple(rad1)),rad1.radius)
-        if (colission.time < 1)
-            rad1.v = colission.reflection
-        end
-        tempΔt -= colission.time * tempΔt
-    end
+    bounceStepUpdate(particle,rad1,tempΔt)
+    oRadical[] = Sphere(Point3f0(positionTuple(rad1)),rad1.radius)
     sleep(Δt) # sleep is required for the plot to update in realtime
 end

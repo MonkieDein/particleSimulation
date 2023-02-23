@@ -49,6 +49,9 @@ mutable struct Round
     v :: coord # velocity of shape
     a :: coord # acceleration of shape
     radius :: Float64 # size of shape
+    function Round(P,radius;V=[0.0,0,0],A=[0.0,0,0])
+        new(coord(P),coord(V),coord(A),radius)
+    end
     function Round(x,y,z,radius;vx=0,vy=0,vz=0,ax=0,ay=0,az=0)
         new(coord(x,y,z),coord(vx,vy,vz),coord(ax,ay,az),radius)
     end
@@ -70,6 +73,10 @@ function random_direction(obj;size = L2Distance(vec(obj.v),zeros(3)))
     obj.v.x = size * sin(θ) * cos(ϕ)
     obj.v.y = size * sin(θ) * sin(ϕ)
     obj.v.z = size * cos(θ)
+end
+
+function random_velocity(obj,size)
+    obj.v = coord(size .* randn(3))
 end
 
 function updateMotion(obj,Δt)
@@ -107,38 +114,67 @@ function checkBoxCollision(box::Square,ball::Round,Δt)
     return(collide = coord(vec(t) .< 1), first = coord(vec(t) .== minimum(vec(t))), time = t)
 end
 
-function checkParticleCollision(particle::Round,ball::Round,Δt)
-    ball1 = coord( vec(ball.p) .+ vec(ball.v) .* Δt )
+function collision(particle::Round,ball::Round,Δt)
+    ball1 = vec(ball.p) .+ vec(ball.v) .* Δt
+    return( L2Distance(vec(particle.p),ball1) ≥ (particle.radius - ball.radius) )
+end
 
+function intersections(center, R, ball, Δt)
+    ball1 =  vec(ball.p) .+ vec(ball.v) .* Δt 
     t = 1
-    r = [0,0,0]
-    if ( L2Distance(vec(particle.p),vec(ball1)) ≥ (particle.radius - ball.radius) )
+    if ( L2Distance(center,ball1) ≥ (R - ball.radius) )
         # Solve for t : x = t x₁ + ( 1 - t ) x₀ ;  y = t y₁ + ( 1 - t ) y₀ ;
         # substitute x and y into : (R - r)² = (xₚ - x)² + (yₚ - y)²  and solve for t.   
-        a = DistanceSquare(vec(ball.p),vec(ball1)) # (x₀ - x₁)^2 + (y₀ - y₁)^2 + (z₀ - z₁)^2
-        b = 2 * sum((vec(particle.p) .- vec(ball.p)) .* (vec(ball.p) .- vec(ball1)))
-        c = DistanceSquare(vec(particle.p),vec(ball.p)) - (particle.radius-ball.radius)^2
+        # http://paulbourke.net/geometry/circlesphere/
+        a = DistanceSquare(vec(ball.p),ball1)
+        b = 2 * sum((center .- vec(ball.p)) .* (vec(ball.p) .- ball1))
+        c = DistanceSquare(center,vec(ball.p)) - (R-ball.radius)^2
         if (b^2 - 4*a*c) > 0
             solve = (-b + sqrt(b^2 - 4*a*c))/(2*a)
-            if solve < 0
-                println(ball)
-                error("time < 0, t : ",solve)
-            end
-            if (0 ≤ solve) && (solve < t)
+            if (0 ≤ solve) && (solve < t) 
                 t = solve
-                # reflection vector r = d - 2(d ⋅ n) n ; 
-                # the normal vector n must be normalized ⋅ is the dot product.
-                # n assume the center of particle is at position (0,0,0)
-                n = normalize( (t .* vec(ball1)) .+ ((1 - t) .* vec(ball.p)) )
-                d = vec(ball.v)
-                r = d .- 2 * ( dot(n,d) ) .* n
-            end 
+            end
+            solve = (-b - sqrt(b^2 - 4*a*c))/(2*a)
+            if (0 ≤ solve) && (solve < t) 
+                t = solve
+            end
         end
     end
+    return(t)
+end
 
+function collisionNreflection(particle::Round,ball::Round,Δt)
+    ball1 =  vec(ball.p) .+ vec(ball.v) .* Δt 
+    t = intersections(vec(particle.p), particle.radius, ball, Δt)
+    r = [0.0,0,0]
+    if (t<1)
+        # reflection vector r = d - 2(d ⋅ n) n ; 
+        # the normal vector n must be normalized ⋅ is the dot product.
+        n = normalize( (t .* ball1) .+ ((1 - t) .* vec(ball.p)) .- vec(particle.p))
+        d = vec(ball.v)
+        r = d .- 2 * ( dot(n,d) ) .* n
+    end 
     return(time = t, reflection = coord(r))
 end
 
 
+function bounceStepUpdate(particle::Round,radicle::Round,Δt)  
+    tempΔt = Δt
+    while tempΔt > 0
+        colission = collisionNreflection(particle,radicle,tempΔt)
+        updateMotion(radicle,colission.time * tempΔt)
+        if (colission.time < 1)
+            radicle.v = colission.reflection
+        end
+        tempΔt -= colission.time * tempΔt
+    end
+end
+
+function resampleStepUpdate(particle::Round,radicle::Round,Δt,axisSize)
+    while (collision(particle,radicle,Δt) == true)
+        random_velocity(radicle,axisSize)
+    end
+    updateMotion(radicle,Δt)
+end
 
 

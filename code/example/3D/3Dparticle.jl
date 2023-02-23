@@ -3,7 +3,6 @@ using DynamicalSystems
 using GeometryBasics
 using GLMakie
 
-
 particle = Round(0,0,0,109)
 rad1 = Round(0,50,0,3,vx = 350)
 
@@ -18,14 +17,7 @@ mesh!(oRadical, color = :red)
 
 for t in ProgressBar(T)
     tempΔt = Δt
-    while tempΔt > 0
-        colission = checkParticleCollision(particle,rad1,tempΔt)
-        updateMotion(rad1,colission.time * tempΔt)
-        oRadical[] = Sphere(Point3f0(positionTuple(rad1)),rad1.radius)
-        if (colission.time < 1)
-            rad1.v = colission.reflection
-        end
-        tempΔt -= colission.time * tempΔt
-    end
+    bounceStepUpdate(particle,rad1,tempΔt)
+    oRadical[] = Sphere(Point3f0(positionTuple(rad1)),rad1.radius)
     sleep(Δt) # sleep is required for the plot to update in realtime
 end
