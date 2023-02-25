@@ -163,7 +163,7 @@ function checkParticleCollision(particle::Circle,ball::Circle,Δt)
                 t = solve
                 # reflection vector r = d - 2(d ⋅ n) n ; 
                 # the normal vector n must be normalized ⋅ is the dot product.
-                n = normalize([ t * ball1.x + (1 - t) * ball.p.x , t * ball1.y + (1 - t) * ball.p.y ])
+                n = normalize([particle.p.x - (t * ball1.x + (1 - t) * ball.p.x) ,particle.p.y -  (t * ball1.y + (1 - t) * ball.p.y) ])
                 d = [ball.v.x , ball.v.y]
                 r = d .- 2 * ( dot(n,d) ) .* n
             end 

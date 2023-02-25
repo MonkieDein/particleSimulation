@@ -23,13 +23,11 @@ end
 
 mutable struct mLparticle
     obj :: Round # particle itself as a Round object
-    L :: DataFrame # Layers rstart and Diffusion coefficient
     Wp :: Float64 # Weightage of polymer
-    function mLparticle(x,y,z,R,L,Wp)
-        new(Round(x,y,z,R),L,Wp)
-    end
-    function mLparticle(P,R,L,Wp)
-        new(coord(P),R,L,Wp)
+    L :: DataFrame # Layers rstart and Diffusion coefficient
+    function mLparticle(R,Wp,L;x=0.0,y=0.0,z=0.0,D = [10^logD(Wp,t,unit="nm") for t in L.ΔT])
+        L.D = D
+        new(Round(x,y,z,R),Wp,L)
     end
 end
 
@@ -40,10 +38,10 @@ mutable struct Radicle
     τ :: Float64 # Global Time step
     σx :: Float64 # Mean square displacement of each axis
     l :: Int # layer index
-    function Radicle(x,y,z,D;r=0,vx=0,vy=0,vz=0,σx = 1,l = 1,zmer = 1,τ = 0.01)
+    function Radicle(x,y,z;D = 1e7,r=0,vx=1,vy=0,vz=0,σx = 1.0,l = 1,zmer = 1,τ = 0.01)
         new(Round([x,y,z],r,V=[vx,vy,vz]),D,zmer,τ,σx,l)
     end
-    function Radicle(P,D;r=0,V=[0.0,0,0],σx = 1,l = 1,zmer = 1,τ = 0.01)
+    function Radicle(P;D = 1e7, r=0,V=[1.0,0,0],σx = 1.0,l = 1,zmer = 1,τ = 0.01)
         new(Round(P,r,V=V),D,zmer,τ,σx,l)
     end
 end
@@ -58,30 +56,61 @@ end
 
 
 function updateRadicle(particle::mLparticle,radicle::Radicle )
-    D = 10^logD(particle.Wp ,particle.L[radicle.l],unit="nm")
-    radicle.D = D/(radicle.zmer^(0.5+1.75*particle.Wp))
-    newσx = sqrt( 2 * radicle.D / radicle.τ)
-    radicle.v = coord( vec(radicle.v) .* (newσx / radicle.σx) ) # scale v multiplying (new_σx/old_σx) 
-    radicle.σx = newσx
+    D = particle.L.D[radicle.l];
+    radicle.D = D/(radicle.zmer^(0.5+1.75*particle.Wp));
+    newσx = sqrt( 2 * radicle.D / radicle.τ);
+    radicle.obj.v = coord( vec(radicle.obj.v) .* (newσx / radicle.σx) ); # scale v multiplying (new_σx/old_σx) 
+    radicle.σx = newσx;
 end
 
-function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt)  
+function LayerTransitionUpdate(particle::mLparticle,radicle::Radicle,l::Int)
+    d = normalize( vec(particle.obj.p) .- vec(radicle.obj.p) )
+    v = normalize( vec(radicle.obj.v) ) 
+    # println(radicle.obj)
+    # println(" the dot prodcut ", dot(d,v))
+    radicle.l = max( 1,l - (dot(d,v) > 0) ) # If dot product > 0 means going toward the center
+    # println(" the layer ",radicle.l)
+    updateRadicle(particle,radicle) # Update radicle new layer information
+end
+
+# If postTransition is True ⟹ min is zero and we already update the transition
+function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTransition = false,fromOuter = false)  
     tempΔt = Δt
     while tempΔt > 0
-        r = L2Distance(vec(particle.obj.p),vec(radicle.obj.p))
-        I = [intersections(particle.obj, R, radicle.obj, tempΔt) for R in particle.L.R]
-        if minimum(I) < 1       # Transition over Layers
-            (tmin,l) = findmin(I)
-            if tmin == 0        # Update parameter before transition
-                d = normalize( vec(radicle.obj.p) .- vec(particle.obj.p) )
-                v = normalize( vec(radicle.obj.v) ) 
-                radicle.l = l - (dot(d,v) > 0) # If dot product > 0 means going toward the center
-                updateRadicle(particle,radicle) # Update radicle new layer information
-                tmin = I[partialsortperm(I, 2)] # find the second smallest time
+        # I = Layer's intersection within time portion [0,1). 1 ⟹ no intersection.
+        I = reduce(vcat,[intersections(vec(particle.obj.p), R, radicle.obj, tempΔt,collide=false) for R in particle.L.R])
+        # l : the index of (1) the smallest element or (2) the second smallest element
+        l = (1 + partialsortperm( I, (1 + postTransition) )) ÷ 2
+        transition_time = I[partialsortperm( I, (1 + postTransition) )]
+        if transition_time == 0        # Transitional update
+            # println("transitional update")
+            LayerTransitionUpdate(particle,radicle,l)
+            multiLbounceStepUpdate(particle,radicle,tempΔt,postTransition = true)
+            tempΔt = 0
+        elseif transition_time < 1     # Intersect with another Layer 
+            # println("intersection update")
+            # println("transition_time x tempΔt:",transition_time * tempΔt)
+            # println(radicle.obj)
+            preUpdatePosition = vec(radicle.obj.p)
+            updateMotion(radicle.obj,transition_time* tempΔt)
+            # if updateMotion is way too small, no positional change
+            # handle 1e16 loop -> incremental position of highest velocity axis
+            if sum(abs.(vec(radicle.obj.p) .- preUpdatePosition)) == 0 
+                V = vec(radicle.obj.v)
+                (v,i) = findmax(abs.(V))
+                if V[i] > 0
+                    preUpdatePosition[i] = nextfloat(preUpdatePosition[i])
+                else
+                    preUpdatePosition[i] = prevfloat(preUpdatePosition[i])
+                end
+                radicle.obj.p = coord(preUpdatePosition)
             end
-            updateMotion(radicle.obj,tmin)
-            tempΔt -= tmin
-        else                    # Collide on particle wall
+            tempΔt -= transition_time * tempΔt
+            # FP addition is not associative, transition update is necessary to avoid surpass layer
+            LayerTransitionUpdate(particle,radicle,l)
+        else                           # Collide on particle wall
+            # println("collsionNreflection")
+            # println(radicle.obj)
             colission = collisionNreflection(particle.obj,radicle.obj,tempΔt)
             updateMotion(radicle.obj,colission.time * tempΔt)
             if (colission.time < 1)
@@ -89,6 +118,7 @@ function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt)
             end
             tempΔt -= colission.time * tempΔt
         end
+        postTransition = false # reset postTransition
     end
 end
 
@@ -101,6 +131,4 @@ function propagationTimeInterval(Wp,TempInC)
     propTime = 1/(k_p * M);                                 # Propagation Time
     return(propTime)
 end
-
-
 

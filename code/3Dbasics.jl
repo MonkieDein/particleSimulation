@@ -4,7 +4,6 @@ using ProgressBars
 using LinearAlgebra
 using Distributions
 using GeometryBasics
-using GLMakie
 
 
 mutable struct coord
@@ -25,6 +24,10 @@ end
 
 function tup(point::coord)
     return( Tuple(vec(point)) )
+end
+
+function L2(point::coord)
+    return( sqrt(sum(vec(point) .^ 2)) )
 end
 
 mutable struct Square
@@ -119,25 +122,29 @@ function collision(particle::Round,ball::Round,Δt)
     return( L2Distance(vec(particle.p),ball1) ≥ (particle.radius - ball.radius) )
 end
 
-function intersections(center, R, ball, Δt)
+# collide 
+# : -1 ⟹ from inside.
+# : 1 ⟹ from outside.
+# : 0 ⟹ center intersection 
+# t[1] ⟹ intersection from inner circle
+# t[2] ⟹ intersection from outer circle
+function intersections(Center, R, ball, Δt;collide=0)
     ball1 =  vec(ball.p) .+ vec(ball.v) .* Δt 
-    t = 1
-    if ( L2Distance(center,ball1) ≥ (R - ball.radius) )
-        # Solve for t : x = t x₁ + ( 1 - t ) x₀ ;  y = t y₁ + ( 1 - t ) y₀ ;
-        # substitute x and y into : (R - r)² = (xₚ - x)² + (yₚ - y)²  and solve for t.   
-        # http://paulbourke.net/geometry/circlesphere/
-        a = DistanceSquare(vec(ball.p),ball1)
-        b = 2 * sum((center .- vec(ball.p)) .* (vec(ball.p) .- ball1))
-        c = DistanceSquare(center,vec(ball.p)) - (R-ball.radius)^2
-        if (b^2 - 4*a*c) > 0
-            solve = (-b + sqrt(b^2 - 4*a*c))/(2*a)
-            if (0 ≤ solve) && (solve < t) 
-                t = solve
-            end
-            solve = (-b - sqrt(b^2 - 4*a*c))/(2*a)
-            if (0 ≤ solve) && (solve < t) 
-                t = solve
-            end
+    t = [1.0,1]
+    # Solve for t : x = t x₁ + ( 1 - t ) x₀ ;  y = t y₁ + ( 1 - t ) y₀ ;
+    # substitute x and y into : (R - r)² = (xₚ - x)² + (yₚ - y)²  and solve for t.   
+    # http://paulbourke.net/geometry/circlesphere/
+    a = DistanceSquare(vec(ball.p),ball1)
+    b = 2 * sum((Center .- vec(ball.p)) .* (vec(ball.p) .- ball1))
+    c = DistanceSquare(Center,vec(ball.p)) - (R+(collide * ball.radius))^2
+    if (b^2 - 4*a*c) > 0
+        solve = (-b + sqrt(b^2 - 4*a*c))/(2*a)
+        if (0 ≤ solve) && (solve < t[1]) 
+            t[1] = solve
+        end
+        solve = (-b - sqrt(b^2 - 4*a*c))/(2*a)
+        if (0 ≤ solve) && (solve < t[2]) 
+            t[2] = solve
         end
     end
     return(t)
@@ -145,15 +152,23 @@ end
 
 function collisionNreflection(particle::Round,ball::Round,Δt)
     ball1 =  vec(ball.p) .+ vec(ball.v) .* Δt 
-    t = intersections(vec(particle.p), particle.radius, ball, Δt)
+    if ( L2Distance(vec(particle.p),ball1) ≥ (particle.radius - ball.radius) )
+        t = intersections(vec(particle.p), particle.radius, ball, Δt,collide = -1)[1]
+    else
+        t = 1
+    end
     r = [0.0,0,0]
     if (t<1)
         # reflection vector r = d - 2(d ⋅ n) n ; 
         # the normal vector n must be normalized ⋅ is the dot product.
-        n = normalize( (t .* ball1) .+ ((1 - t) .* vec(ball.p)) .- vec(particle.p))
+        n = normalize( vec(particle.p) .- ((t .* ball1) .+ ((1 - t) .* vec(ball.p))) )
         d = vec(ball.v)
         r = d .- 2 * ( dot(n,d) ) .* n
     end 
+
+    if (t < 0 )
+        error("There is error in collision time")
+    end
     return(time = t, reflection = coord(r))
 end
 
