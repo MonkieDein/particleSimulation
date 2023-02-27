@@ -82,7 +82,7 @@ for r in L.R
 end
 plt
 
-
+display("image/png", plt)
 # ff = findfirst( (80 .< L2CMat .< 100) .& (VtMat .> 10) )
 
 # in_P = vec(pos[ff[1]-1,ff[2]])
