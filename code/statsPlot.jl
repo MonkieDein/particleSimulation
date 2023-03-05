@@ -55,7 +55,7 @@ function AddVelocityBoxPlot(plt,Q,rmsv,Ermsv,w;linewidth = 1,rmsw= 3.0,title = "
     return(plt)
 end
 
-function sampleDepthPlot(sims,par;center=[0.0,0,0],bar_width = 0.8,qs = [0.05,0.25,0.75,0.95],
+function velocityBoxPlot(sims,par;center=[0.0,0,0],bar_width = 0.8,qs = [0.05,0.25,0.75,0.95],
     xlabel="Zmer length",ylabel = "velocity",title="Velocity Boxplot",leg_title ="Stats")
     lLl = length(par.L.R)
     L2CMat = [L2Distance(center,vec(rad_p)) for rad_p in sims.P]

@@ -30,7 +30,7 @@ sims = simulate(τ,propTime,T,par,Rad)
 # if you want it to write the simulations result into a folder
 # writeSimsData(sims;folder="Data",overwrite=false)
 
-sampleDepthPlot(sims,par) |> display
+velocityBoxPlot(sims,par) |> display
 # savefig("plots/Mlayer3D/velocityBoxPlot.png")
 
 sampleDepthPlot(sims,length(L.R),lPropl,propTime,lZmerl) |> display
