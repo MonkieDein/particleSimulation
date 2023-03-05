@@ -1,5 +1,6 @@
 include("../../chem.jl")
 using Plots
+# Simulate radical in a single direction with fix velocity
 
 function circumference(x,y,radius;n=150)
     t = range(0, 2π, length = n)

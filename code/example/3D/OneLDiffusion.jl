@@ -1,5 +1,5 @@
-include("../../3Dbasics.jl")
 include("../../chem.jl")
+using GLMakie
 
 # Diffusion coefficient parameters
 Wp = 1-Wm                               # Wp : Weightage of polymer

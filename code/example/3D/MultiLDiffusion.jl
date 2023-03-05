@@ -1,5 +1,6 @@
 include("../../chem.jl")
 using Colors
+using GLMakie
 
 # Multi Layer Particle variables
 Wp = 0.95                               # Wp : Weightage of polymer

@@ -76,6 +76,7 @@ end
 # If postTransition is True ⟹ min is zero and we already update the transition
 function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTransition = false,fromOuter = false)  
     tempΔt = Δt
+    minL = radicle.l
     while tempΔt > 0
         # I = Layer's intersection within time portion [0,1). 1 ⟹ no intersection.
         I = reduce(vcat,[intersections(vec(particle.obj.p), R, radicle.obj, tempΔt,collide=false) for R in particle.L.R])
@@ -85,7 +86,8 @@ function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTr
         if transition_time == 0        # Transitional update
             # println("transitional update")
             LayerTransitionUpdate(particle,radicle,l)
-            multiLbounceStepUpdate(particle,radicle,tempΔt,postTransition = true)
+            L = multiLbounceStepUpdate(particle,radicle,tempΔt,postTransition = true)
+            minL = min(L,minL)
             tempΔt = 0
         elseif transition_time < 1     # Intersect with another Layer 
             # println("intersection update")
@@ -120,6 +122,7 @@ function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTr
         end
         postTransition = false # reset postTransition
     end
+    return(minL)
 end
 
 # Propagation Time for Monomer
@@ -132,3 +135,60 @@ function propagationTimeInterval(Wp,TempInC)
     return(propTime)
 end
 
+function simulate(τ::Float64,propTime::Float64,T::Float64,par::mLparticle,Rad::Vector{Radicle})
+    # Stats of Simulation 
+    Time = collect(0:τ:T)
+    lTl = length(Time)                        
+    N = length(Rad)
+    pos = Array{coord}(undef, (lTl,N))      
+    vel = Array{coord}(undef, (lTl,N))     
+    zmers = zeros(Int,(lTl,N))
+    minL = ones(Int,(lTl,N)) .+ length(par.L.D)
+    tnextP = zeros(N) .+ propTime
+    for (i,t) in ProgressBar(enumerate(Time))
+        for (j,rad) in enumerate(Rad)
+            random_velocity(rad.obj,rad.σx)
+            # ------ Collect Statistics -----
+            pos[i,j] = rad.obj.p 
+            vel[i,j] = rad.obj.v 
+            zmers[i,j] = rad.zmer 
+            minL[i,j] = rad.l
+            # ------  ----- ----- -----  -----
+            # ------ Taking Time step update -----
+            tempτ = τ
+            while (tnextP[j] - t <= tempτ) 
+                # ----- udpate position before propagation -----
+                prePropTime = tnextP[j] - t # remaining time before propagation
+                curL = multiLbounceStepUpdate(par,rad,prePropTime)
+                minL[i,j] = min( minL[i,j] ,curL)
+                tempτ -= prePropTime
+                # ----- radicle undergo propagation -----
+                rad.zmer += 1
+                updateRadicle(par,rad)
+                tnextP[j] += propTime
+            end
+            curL = multiLbounceStepUpdate(par,rad,tempτ)
+            minL[i,j] = min( minL[i,j] ,curL)
+            # ------  ----- ----- -----  -----
+        end
+    end
+    return(P=pos,V=vel,Zmer=zmers,Time=Time,minL=minL)
+end
+
+function MaxStepSize(D,Wp,zmer,τ;sd=1,confident=(1-cdf(Distributions.Normal(),-sd)*2))
+    Dmax = maximum(D)/(zmer^(0.5+1.75*Wp));
+    L2_std = sqrt( 6 * Dmax * τ ); 
+    q = (1 .- confident) ./ 2
+    Z = abs.(Distributions.quantile.(Distributions.Normal(0,L2_std), q))
+    return(Z)
+end
+
+function MinTimeForStepsize(stepsize,D,Wp,zmer;
+    sd=1,confident=(1-cdf(Distributions.Normal(),-sd)*2))
+    τ = 1
+    Dmax = maximum(D)/(zmer^(0.5+1.75*Wp));
+    L2_std = sqrt( 6 * Dmax * τ ); 
+    q = (1 .- confident) ./ 2
+    Z = abs.(Distributions.quantile.(Distributions.Normal(0,L2_std), q))
+    return( (( stepsize ./ Z' ) .^ 2) )
+end
