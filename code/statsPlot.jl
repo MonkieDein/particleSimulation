@@ -91,7 +91,7 @@ function velocityBoxPlot(sims,par;center=[0.0,0,0],bar_width = 0.8,qs = [0.05,0.
             w2 = z - 0.5 + width_i[layer+1]- width_delta*(1-bar_width)/2
             Q = quantile(V2CL,qs)
             AddVelocityBoxPlot(
-                bp,Q,rmsv,Ermsv[z-lZmerl+1,layer],[w1,w2];
+                bp,Q,rmsv,Ermsv[z-minimum(uZ)+1,layer],[w1,w2];
                 linewidth = 1,rmsw= 2,label = ( z==first(uZ) ? "Layer-"*string(layer)*" IQR" : ""),
                 ls=:solid,lc=:red,lb=:black,fill=colors[layer]
             )
