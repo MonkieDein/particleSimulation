@@ -85,16 +85,18 @@ function velocityBoxPlot(sims,par;center=[0.0,0,0],bar_width = 0.8,qs = [0.05,0.
             l_lower = layerLims[layer]
             l_upper = layerLims[layer+1]
             LI = findall(l_lower.< L2center .<= l_upper)
-            V2CL = VoverT[LI]
-            rmsv = sqrt(mean(V2CL.^2))
-            w1 = z - 0.5 + width_i[layer]+ width_delta*(1-bar_width)/2
-            w2 = z - 0.5 + width_i[layer+1]- width_delta*(1-bar_width)/2
-            Q = quantile(V2CL,qs)
-            AddVelocityBoxPlot(
-                bp,Q,rmsv,Ermsv[z-minimum(uZ)+1,layer],[w1,w2];
-                linewidth = 1,rmsw= 2,label = ( z==first(uZ) ? "Layer-"*string(layer)*" IQR" : ""),
-                ls=:solid,lc=:red,lb=:black,fill=colors[layer]
-            )
+            if !isempty(LI)
+                V2CL = VoverT[LI]
+                rmsv = sqrt(mean(V2CL.^2))
+                w1 = z - 0.5 + width_i[layer]+ width_delta*(1-bar_width)/2
+                w2 = z - 0.5 + width_i[layer+1]- width_delta*(1-bar_width)/2
+                Q = quantile(V2CL,qs)
+                AddVelocityBoxPlot(
+                    bp,Q,rmsv,Ermsv[z-minimum(uZ)+1,layer],[w1,w2];
+                    linewidth = 1,rmsw= 2,label = ( z==last(uZ) ? "Layer-"*string(layer)*" IQR" : ""),
+                    ls=:solid,lc=:red,lb=:black,fill=colors[layer]
+                )
+            end
         end
     end
     scatter!(bp,[],[],label="Expected RMS",m=:cross,color=:red)
