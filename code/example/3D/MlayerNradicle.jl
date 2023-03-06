@@ -13,7 +13,7 @@ propTime = propagationTimeInterval(Wp,T)# propTime : Time Interval for Monomer t
 lPropl = 8;                             # Number of propagation steps before end
 T = lPropl * propTime                   # T        : Total simulation time interval
 # τ        : time interval for a Random walk step
-maxStepLength = 5
+maxStepLength = 10
 lZmerl = 4;                             # Zmer length (Different for each monomer): 
 τ = MinTimeForStepsize(maxStepLength,par.L.D,Wp,lZmerl,confident=0.9)  
 
@@ -27,12 +27,19 @@ end
 # Monte Carlo Simulation
 sims = simulate(τ,propTime,T,par,Rad)
 
+# j = 2 # select a arbitrary monte carlo instance
+# # see distancePlot of instance j
+# distancePlot(sims,par,j,propTime,lPropl)
+# fps = 60
+# video = distanceAnim(sims,par,j,propTime,lPropl;videoSec = 20,fps = fps)
+# gif(video,"animation/DistTimePlot"*string(j)*".mp4",fps=fps)
+
 # if you want it to write the simulations result into a folder
 # writeSimsData(sims;folder="Data",overwrite=false)
 
-velocityBoxPlot(sims,par) |> display
+# velocityBoxPlot(sims,par) |> display
 # savefig("plots/Mlayer3D/velocityBoxPlot.png")
 
-sampleDepthPlot(sims,length(L.R),lPropl,propTime,lZmerl) |> display
+# sampleDepthPlot(sims,length(L.R),lPropl,propTime,lZmerl) |> display
 # savefig("plots/Mlayer3D/DeepestSamples.png")
 

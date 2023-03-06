@@ -23,7 +23,7 @@ function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl)
     for (i,c) in enumerate(palette(:cool, lLl))
         scatter!(pltProb,[],[],color=c,label=string(i))
     end
-    # Add Zmer Lenght
+    # Add Zmer Length
     for p in 0:(lPropl-1)
         t_i = propTime * (p+1)
         plot!(pltProb,[t_i,t_i],[0,N],lc=:black,label="")
@@ -102,6 +102,44 @@ function velocityBoxPlot(sims,par;center=[0.0,0,0],bar_width = 0.8,qs = [0.05,0.
     scatter!(bp,[],[],label=string(round(Int,last(qs)*100))*"%-quantile",m=:dtriangle,color=:white,linewidth =1)
     scatter!(bp,[],[],label=string(round(Int,first(qs)*100))*"%-quantile",m=:utriangle,color=:white,linewidth =1)
     return(bp)
+end
+function distanceAnim(sims,par,j,propTime,lPropl;videoSec = 20,fps = 60)
+    I = [1;round.(Int,range(0,1,videoSec*fps)[Not(1)] .* length(sims.Time))]
+    distancePlot(sims,par,j,propTime,lPropl)
+
+    video = @animate for i in ProgressBar(I)
+        distancePlot(sims,par,j,propTime,lPropl,i=i)
+    end
+    return(video)
+end
+
+function distancePlot(
+    sims,par,j,propTime,lPropl;i=length(sims.Time),center = [0.0,0,0])
+
+    lLl = length(par.L.R)
+    colors = palette(:cool, lLl)
+    layerLims = [par.L.R;par.obj.radius]
+    L2vj=[L2Distance(center,vec(rad_p)) for rad_p in sims.P[:,j]]
+    Height = [0,par.obj.radius]
+    plt = plot(
+        xlim=(0,last(sims.Time)),ylim=(0,par.obj.radius*1.01),
+        legend=:outerright , xlabel = "time (second)",ylabel = "Distance from center (nm)",
+        title = "Radical distance from center",size = (700,600), xticks=range(0,round.(last(sims.Time),sigdigits=2),6)[Not(1)]
+    )
+    # Add layer colors
+    for l in 1:lLl
+        BoxShape(plt,[0,last(sims.Time)],layerLims[[l,l+1]];bw= 1,lc=plot_color(colors[l], 0.2),c = plot_color(colors[l], 0.2),label="Layer-"*string(l))
+    end
+    # Add Zmer Length
+    for p in 0:(lPropl-1)
+        t_i = propTime * (p+1)
+        plot!(plt,[t_i,t_i],Height,lc=plot_color(:grey,0.5),label="")
+        annotate!(plt,[ (t_i-0.5*propTime,Height[2]*1.01,(string(lZmerl+p),8,:black)) ] )
+    end
+    annotate!(plt,[ (propTime*(lPropl+0.5),Height[2]*1.01,("Z-mer",8,:black)) ] )
+
+    plot!(plt,sims.Time[1:i],L2vj[1:i],lc=:black,label="radicle")
+    return(plt)
 end
 
 function wdir(folder)
