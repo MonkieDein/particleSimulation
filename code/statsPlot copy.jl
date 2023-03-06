@@ -3,46 +3,35 @@ using Plots
 using Colors
 using CSV
 
-function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl;X=sims.Time,Z=[],ntick=1)
-    lTl = length(sims.Time)
-    N = size(sims.P,2)
-    # Nreach = zeros(Int,size(sims.Time))
+
+function simpleDepthPlot(
+    sims,lLl;lTl= length(sims.Time),N= size(sims.P,2),
+    colors = palette(:cool, lLl),title="", xlabel="", ylabel="")
     Layers = ones(Int,(lTl,N)) .+ lLl
     sortLayers = ones(Int,(lTl,N)) .+ lLl
-    colors = palette(:cool, lLl)
-    if isempty(Z)
-        for i in 1:lTl
-            Layers[i,:] = min.(Layers[max(i-1,1),:],sims.minL[i,:])
-            sortLayers[i,:] = sort(copy(Layers[i,:]))
-            # Nreach[i] = sum(Layers[i,:] .== 1)
-        end
-    else
-        for z_i in 2:length(Z)
-            for i in (Z[z_i-1]+1):(Z[z_i])
-                Layers[i,:] = min.(Layers[max(i-1,Z[z_i-1]+1),:],sims.minL[i,:])
-                sortLayers[i,:] = sort(copy(Layers[i,:]))
-                # Nreach[i] = sum(Layers[i,:] .== 1)
-            end
-        end
+    for i in 1:lTl
+        Layers[i,:] = min.(Layers[max(i-1,1),:],sims.minL[i,:])
+        sortLayers[i,:] = sort(copy(Layers[i,:]))
     end
-    existLayers = sort(unique(sortLayers))
+    existLayers = collect(minimum(sortLayers):maximum(sortLayers))
     # Plot Heat Map
-    pltProb = heatmap(X, 1:N,transpose(sortLayers),color = colors[existLayers],
-    title="Distribution of Deepest Layer reached",legend=:outerright,
-    xlabel="Time", ylabel="No of samples",ylims=(0,N*1.1),colorbar=false,leg_title ="Layer" , dpi=300
-    )
-    # Add customize axis label
-    if !isempty(Z)
-        plot!(pltProb,xticks = [])
-        for z_i in 2:length(Z)
-            XR = round.(Int,range(Z[z_i-1]+1,Z[z_i],ntick+2))
-            for x in XR[2:2+ntick-1]
-                plot!(pltProb,[x,x],[0,1],color=:black,label="")
-                annotate!(pltProb,[ (x,N*(-.02),(string(round(sims.Time[x],sigdigits=2)),5,:black)) ] )
-            end
-        end
-        
-    end
+    pltProb = heatmap(
+        sims.Time, 1:N,transpose(sortLayers),color = colors[existLayers] ,
+        colorbar=false, dpi=300,title=title,xlabel=xlabel,ylabel=ylabel)
+    return(pltProb)
+end
+
+function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl)
+    lTl = length(sims.Time)
+    N = size(sims.P,2)
+    colors = palette(:cool, lLl)
+
+    # Plot Heat Map
+    pltProb = simpleDepthPlot(sims,lLl,lTl=lTl,N=N,colors=colors,
+    title="Distribution of Deepest Layer reached",
+    xlabel="Time", ylabel="No of samples")
+    
+    plot!(pltProb,ylims=(0,N*1.1),legend=:outerright,leg_title ="Layer")
     # Plot Label
     for (i,c) in enumerate(colors)
         scatter!(pltProb,[],[],color=c,label=string(i))
@@ -53,16 +42,17 @@ function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl;X=sims.Time,Z=[],ntick=
         plot!(pltProb,[t_i,t_i],[0,N],lc=:black,label="")
         annotate!(pltProb,[ (t_i-0.5*propTime,N*1.05,(string(lZmerl+p),8,:black)) ] )
     end
-    annotate!(pltProb,[ (propTime*(lPropl*1.07),N*1.05,("Z-mer",8,:black)) ] )
+    annotate!(pltProb,[ (propTime*(lPropl+0.5),N*1.05,("Z-mer",8,:black)) ] )
     return(pltProb)
 end
+
 
 function BoxShape(plt,w,h;bw= 3,lc=:black,c = plot_color(:lightgreen, 0.1),label="")
     plot!(plt,Shape([(w[2],h[2]),(w[2],h[1]),(w[1],h[1]),(w[1],h[2])]),label=label,linewidth = bw,lc=lc,c=c)
     return(plt)
 end
 
-function AddVelocityBoxPlot(plt,Q,rmsv,Ermsv,w;linewidth = 1,rmsw= 3.0,title = "box",
+function AddVelocityBoxPlot(plt,Q,rmsv,Ermsv,w;linewidth = 1,rmsw= 3.0,
     label = "label",ls=:solid,lc=:blue,lb=:black,fill=:white)
     # Add verticle line
     midw = mean(w)
@@ -79,7 +69,7 @@ function AddVelocityBoxPlot(plt,Q,rmsv,Ermsv,w;linewidth = 1,rmsw= 3.0,title = "
     return(plt)
 end
 
-function velocityBoxPlot(sims,par,τ;center=[0.0,0,0],bar_width = 0.8,qs = [0.05,0.25,0.75,0.95],
+function velocityBoxPlot(sims,par;center=[0.0,0,0],bar_width = 0.8,qs = [0.05,0.25,0.75,0.95],
     xlabel="Zmer length",ylabel = "velocity",title="Velocity Boxplot",leg_title ="Stats")
     lLl = length(par.L.R)
     L2CMat = [L2Distance(center,vec(rad_p)) for rad_p in sims.P]
@@ -96,10 +86,9 @@ function velocityBoxPlot(sims,par,τ;center=[0.0,0,0],bar_width = 0.8,qs = [0.05
     width_delta = 1/(lLl+2)
 
     bp = plot(
-        xlabel=xlabel,ylabel = ylabel,title=title,leg_title =leg_title, dpi=300, yaxis=:log10,
-        xlims =(minimum(uZ)-1,maximum(uZ)+1),ylims = (quantile(reduce(vcat,VtMat),qs[1]/length(uZ)),maximum(VtMat)),
-        legend=:outerright,xticks = uZ
-    )
+        xlabel=xlabel,ylabel = ylabel,title=title,leg_title =leg_title, yaxis=:log10,dpi=300,
+        xlims =(minimum(uZ)-1,maximum(uZ)+1),xticks = uZ,legend=:outerright
+    )#,ylims = (1,maximum(VtMat)),yticks = 10 .^ (1:ceil(log(maximum(VtMat))/log(10)))
     # Group by zmer length
     for z in unique(uZ)
         TI = findall(sims.Zmer .== z)
@@ -124,9 +113,9 @@ function velocityBoxPlot(sims,par,τ;center=[0.0,0,0],bar_width = 0.8,qs = [0.05
             end
         end
     end
-    for l in 1:lLl
-        BoxShape(bp,(minimum(uZ) .- [100,99]),(maximum(VtMat)*10 .+ [1,2]);
-        bw= 1,c = colors[l],label="Layer-"*string(l)*" IQR")
+    # Use Number beyond xlims and ylims
+    for layer in 1:lLl
+        BoxShape(bp,[maximum(uZ)+99;maximum(uZ)+100],[maximum(VtMat);maximum(VtMat)+1];bw= 1,lc=:black,c = colors[layer],label="Layer-"*string(layer)*" IQR")
     end
     scatter!(bp,[],[],label="Expected RMS",m=:cross,color=:red)
     scatter!(bp,[],[],label="Simulate RMS",m=:xcross,color=:black)
@@ -134,16 +123,18 @@ function velocityBoxPlot(sims,par,τ;center=[0.0,0,0],bar_width = 0.8,qs = [0.05
     scatter!(bp,[],[],label=string(round(Int,first(qs)*100))*"%-quantile",m=:utriangle,color=:white,linewidth =1)
     return(bp)
 end
-function distanceAnim(sims,par,j,propTime,lPropl,lZmerl;videoSec = 20,fps = 60)
+function distanceAnim(sims,par,j,propTime,lPropl;videoSec = 20,fps = 60)
     I = [1;round.(Int,range(0,1,videoSec*fps)[Not(1)] .* length(sims.Time))]
+    distancePlot(sims,par,j,propTime,lPropl)
+
     video = @animate for i in ProgressBar(I)
-        distancePlot(sims,par,j,propTime,lPropl,lZmerl,i=i)
+        distancePlot(sims,par,j,propTime,lPropl,i=i)
     end
     return(video)
 end
 
 function distancePlot(
-    sims,par,j,propTime,lPropl,lZmerl;i=length(sims.Time),center = [0.0,0,0])
+    sims,par,j,propTime,lPropl;i=length(sims.Time),center = [0.0,0,0])
 
     lLl = length(par.L.R)
     colors = palette(:cool, lLl)
@@ -165,7 +156,7 @@ function distancePlot(
         plot!(plt,[t_i,t_i],Height,lc=plot_color(:grey,0.5),label="")
         annotate!(plt,[ (t_i-0.5*propTime,Height[2]*1.01,(string(lZmerl+p),8,:black)) ] )
     end
-    annotate!(plt,[ (propTime*(lPropl*1.07),Height[2]*1.01,("Z-mer",8,:black)) ] )
+    annotate!(plt,[ (propTime*(lPropl+0.5),Height[2]*1.01,("Z-mer",8,:black)) ] )
 
     plot!(plt,sims.Time[1:i],L2vj[1:i],lc=:black,label="radicle")
     return(plt)
