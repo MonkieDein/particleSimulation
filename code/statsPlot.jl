@@ -6,21 +6,23 @@ using CSV
 function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl)
     lTl = length(sims.Time)
     N = size(sims.P,2)
-    Nreach = zeros(Int,size(sims.Time))
+    # Nreach = zeros(Int,size(sims.Time))
     Layers = ones(Int,(lTl,N)) .+ lLl
     sortLayers = ones(Int,(lTl,N)) .+ lLl
+    colors = palette(:cool, lLl)
     for i in 1:lTl
         Layers[i,:] = min.(Layers[max(i-1,1),:],sims.minL[i,:])
         sortLayers[i,:] = sort(copy(Layers[i,:]))
-        Nreach[i] = sum(Layers[i,:] .== 1)
+        # Nreach[i] = sum(Layers[i,:] .== 1)
     end
+    existLayers = collect(minimum(sortLayers):maximum(sortLayers))
     # Plot Heat Map
-    pltProb = heatmap(sims.Time, 1:N,transpose(sortLayers),color = palette(:cool, lLl),
+    pltProb = heatmap(sims.Time, 1:N,transpose(sortLayers),color = colors[existLayers],
     title="Distribution of Deepest Layer reached",legend=:outerright,
     xlabel="Time", ylabel="No of samples",ylims=(0,N*1.1),colorbar=false,leg_title ="Layer" , dpi=300
     )
     # Plot Label
-    for (i,c) in enumerate(palette(:cool, lLl))
+    for (i,c) in enumerate(colors)
         scatter!(pltProb,[],[],color=c,label=string(i))
     end
     # Add Zmer Length

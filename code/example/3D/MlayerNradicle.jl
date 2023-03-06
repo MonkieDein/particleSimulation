@@ -2,10 +2,10 @@ include("../../statsPlot.jl")
 
 # Multi Layer Particle variables
 Wp = 0.95                               # Wp : Weightage of polymer
-T = 80                                  # T : Reaction Temparature (°C)
+T = 70                                  # T : Reaction Temparature (°C)
 L = DataFrame(                          # L : Layer DataFrame
     R = [0,50,57,62,66],                # R : Radius away from center
-    ΔT = (T .- [30,40,60,90,80]) )      # ΔT = T - Tg
+    ΔT = (T .- [30,90,30,90,30]) )      # ΔT = T - Tg
 par = mLparticle(70,Wp,L)               # particle structure
 
 # Simulation Time and Frame parameter
@@ -37,7 +37,7 @@ sims = simulate(τ,propTime,T,par,Rad)
 # if you want it to write the simulations result into a folder
 # writeSimsData(sims;folder="Data",overwrite=false)
 
-velocityBoxPlot(sims,par) |> display
+# velocityBoxPlot(sims,par) |> display
 # savefig("plots/Mlayer3D/velocityBoxPlot.png")
 
 sampleDepthPlot(sims,length(L.R),lPropl,propTime,lZmerl) |> display
