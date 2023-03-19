@@ -22,4 +22,4 @@ video = @animate for t in ProgressBar(T)
     end
 end
 
-gif(video,"animation/particle.mp4",fps=60)
+mp4(video,"animation/particle.mp4",fps=60)

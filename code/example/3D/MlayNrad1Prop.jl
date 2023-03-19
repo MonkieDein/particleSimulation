@@ -2,11 +2,11 @@ include("../../statsPlot.jl")
 
 # Multi Layer Particle variables
 Wp = 0.95                               # Wp : Weightage of polymer
-T = 70                                  # T : Reaction Temparature (°C)
+T = 80                                  # T : Reaction Temparature (°C)
 L = DataFrame(                          # L : Layer DataFrame
-    R = [0,50,57,62,66],                # R : Radius away from center
-    ΔT = (T .- [30,50,60,70,30]) )      # ΔT = T - Tg
-par = mLparticle(70,Wp,L)               # particle structure
+    R = [0,50,55,60],                # R : Radius away from center
+    ΔT = (T .- [25.4,103.3,25.4,103.3]) )      # ΔT = T - Tg
+par = mLparticle(65,Wp,L)               # particle structure
 
 # Simulation Time and Frame parameter
 propTime = propagationTimeInterval(Wp,T)# propTime : Time Interval for Monomer to propagate
@@ -26,7 +26,7 @@ Time_all = []
 depth_all = []
 Zindex = [0]
 # Zmer length (Different for each monomer): 
-ZmerRange = 3:11
+ZmerRange = 4:12
 τ = MinTimeForStepsize(maxStepLength,par.L.D,Wp,minimum(ZmerRange),confident=0.9)  
 for lZmerl in ZmerRange
 
@@ -50,20 +50,20 @@ for lZmerl in ZmerRange
     push!(Zindex,length(Time_all))
 
     ##### J distance plots & Distance animation. J ≤ N
-    # J = 1
-    # if J > N
-    #     error("J is bigger than available monte carlo instance N")
-    # else
-    #     for j in 1:J
-    #         # see distancePlot of instance j
-    #         distancePlot(sims,par,j,propTime,lPropl,lZmerl) |> display
-    #         savefig("plots/Mlayer3D/distPlt_Z"*string(lZmerl)*"_j"*string(j)*".png")
+    J = 1
+    if J > N
+        error("J is bigger than available monte carlo instance N")
+    else
+        for j in 1:J
+            # see distancePlot of instance j
+            distancePlot(sims,par,j,propTime,lPropl,lZmerl) |> display
+            savefig("plots/Mlayer3D/distPlt_Z"*string(lZmerl)*"_j"*string(j)*".png")
             
-    ##         println("Generating Plot Distance Animation ",j)
-    ##         video = distanceAnim(sims,par,j,propTime,lPropl,lZmerl;videoSec = 10,fps = 60)
-    ##         gif(video,wdir(wdir("animation")*"/Z"*string(lZmerl))*"/DistTimePlotj"*string(j)*".mp4",fps=60)
-    #     end
-    # end
+            println("Generating Plot Distance Animation ",j)
+            video = distanceAnim(sims,par,j,propTime,lPropl,lZmerl;videoSec = 10,fps = 60)
+            gif(video,wdir(wdir("animation")*"/Z"*string(lZmerl))*"/DistTimePlotj"*string(j)*".gif",fps=60)
+        end
+    end
     ###### Write simulation to csv
     # writeSimsData(sims;folder="Data/Z"*string(lZmerl),overwrite=false)
 end    
@@ -73,7 +73,7 @@ Sims_all = (P=P_all,V=V_all,Zmer=Zmer_all,Time=Time_all,minL=minL_all)
 # velocityBoxPlot(Sims_all,par,τ) |> display
 # savefig("plots/Mlayer3D/bindVelocityBoxPlot.png")
 
-# depplt = sampleDepthPlot(
-#     Sims_all,length(L.R),length(ZmerRange),Zindex[2],ZmerRange[1];
-#     X = 1:length(Sims_all.Time),Z = Zindex  ) |> display
+depplt = sampleDepthPlot(
+    Sims_all,length(L.R),length(ZmerRange),Zindex[2],ZmerRange[1];
+    X = 1:length(Sims_all.Time),Z = Zindex  ) |> display
 # savefig("plots/Mlayer3D/bindDeepestSamples.png")

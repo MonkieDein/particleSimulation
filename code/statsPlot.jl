@@ -27,7 +27,8 @@ function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl;X=sims.Time,Z=[],ntick=
     end
     existLayers = sort(unique(sortLayers))
     # Plot Heat Map
-    pltProb = heatmap(X, 1:N,transpose(sortLayers),color = colors[existLayers],
+    pltProb = heatmap(X, 1:N,transpose(sortLayers),
+    color = ( length(existLayers) > 1 ? colors[existLayers] : repeat(colors[existLayers],2)),
     title="Distribution of Deepest Layer reached",legend=:outerright,
     xlabel="Time", ylabel="No of samples",ylims=(0,N*1.1),colorbar=false,leg_title ="Layer" , dpi=300
     )
