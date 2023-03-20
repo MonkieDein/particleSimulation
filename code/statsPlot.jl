@@ -3,13 +3,13 @@ using Plots
 using Colors
 using CSV
 
-function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl;X=sims.Time,Z=[],ntick=1)
+function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl;X=sims.Time,Z=[],ntick=1,
+    colors = range(HSV(-120,1,1), stop=HSV(-360,1,1), length=lLl))
     lTl = length(sims.Time)
     N = size(sims.P,2)
     # Nreach = zeros(Int,size(sims.Time))
     Layers = ones(Int,(lTl,N)) .+ lLl
     sortLayers = ones(Int,(lTl,N)) .+ lLl
-    colors = palette(:cool, lLl)
     if isempty(Z)
         for i in 1:lTl
             Layers[i,:] = min.(Layers[max(i-1,1),:],sims.minL[i,:])
@@ -81,8 +81,9 @@ function AddVelocityBoxPlot(plt,Q,rmsv,Ermsv,w;linewidth = 1,rmsw= 3.0,title = "
 end
 
 function velocityBoxPlot(sims,par,τ;center=[0.0,0,0],bar_width = 0.8,qs = [0.05,0.25,0.75,0.95],
-    xlabel="Zmer length",ylabel = "velocity",title="Velocity Boxplot",leg_title ="Stats")
-    lLl = length(par.L.R)
+    xlabel="Zmer length",ylabel = "velocity",title="Velocity Boxplot",leg_title ="Stats",lLl = length(par.L.R),
+    colors = range(HSV(-120,1,1), stop=HSV(-360,1,1), length=lLl) )
+    
     L2CMat = [L2Distance(center,vec(rad_p)) for rad_p in sims.P]
     VtMat  = [L2Distance([0.0,0,0],vec(v)) for v in sims.V]
 
@@ -92,7 +93,6 @@ function velocityBoxPlot(sims,par,τ;center=[0.0,0,0],bar_width = 0.8,qs = [0.05
     Dmat = par.L.D' ./ (unique(uZ) .^ (0.5+1.75*par.Wp))
     Ermsv = [sqrt(6 * eD / τ) for eD in Dmat]
 
-    colors = palette(:cool, lLl)
     width_i = collect(1:(lLl+1)) ./ (lLl+2)
     width_delta = 1/(lLl+2)
 
@@ -144,10 +144,9 @@ function distanceAnim(sims,par,j,propTime,lPropl,lZmerl;videoSec = 20,fps = 60)
 end
 
 function distancePlot(
-    sims,par,j,propTime,lPropl,lZmerl;i=length(sims.Time),center = [0.0,0,0])
+    sims,par,j,propTime,lPropl,lZmerl;i=length(sims.Time),center = [0.0,0,0],lLl = length(par.L.R),
+    colors = range(HSV(-120,1,1), stop=HSV(-360,1,1), length=lLl)) # ,colors = palette(:cool, lLl)
 
-    lLl = length(par.L.R)
-    colors = palette(:cool, lLl)
     layerLims = [par.L.R;par.obj.radius]
     L2vj=[L2Distance(center,vec(rad_p)) for rad_p in sims.P[:,j]]
     Height = [0,par.obj.radius]

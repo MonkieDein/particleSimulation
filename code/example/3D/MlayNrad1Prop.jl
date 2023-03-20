@@ -50,20 +50,19 @@ for lZmerl in ZmerRange
     push!(Zindex,length(Time_all))
 
     ##### J distance plots & Distance animation. J ≤ N
-    J = 1
-    if J > N
-        error("J is bigger than available monte carlo instance N")
-    else
-        for j in 1:J
-            # see distancePlot of instance j
-            distancePlot(sims,par,j,propTime,lPropl,lZmerl) |> display
-            savefig("plots/Mlayer3D/distPlt_Z"*string(lZmerl)*"_j"*string(j)*".png")
-            
-            println("Generating Plot Distance Animation ",j)
-            video = distanceAnim(sims,par,j,propTime,lPropl,lZmerl;videoSec = 10,fps = 60)
-            gif(video,wdir(wdir("animation")*"/Z"*string(lZmerl))*"/DistTimePlotj"*string(j)*".gif",fps=60)
-        end
-    end
+    # J = 1
+    # if J > N
+    #     error("J is bigger than available monte carlo instance N")
+    # else
+    #     for j in 1:J
+    #         # see distancePlot of instance j
+    #         distancePlot(sims,par,j,propTime,lPropl,lZmerl) |> display
+    #         savefig("plots/Mlayer3D/distPlt_Z"*string(lZmerl)*"_j"*string(j)*".png") 
+    #         println("Generating Plot Distance Animation ",j)
+    #         video = distanceAnim(sims,par,j,propTime,lPropl,lZmerl;videoSec = 10,fps = 60)
+    #         gif(video,wdir(wdir("animation")*"/Z"*string(lZmerl))*"/DistTimePlotj"*string(j)*".gif",fps=60)
+    #     end
+    # end
     ###### Write simulation to csv
     # writeSimsData(sims;folder="Data/Z"*string(lZmerl),overwrite=false)
 end    
