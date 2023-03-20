@@ -43,18 +43,25 @@ velocityBoxPlot(sims,par,τ) |> display
 sampleDepthPlot(sims,length(L.R),lPropl,propTime,lZmerl) |> display
 # savefig("plots/Mlayer3D/DeepestSamples.png")
 
+# get and save Depth matrix into a file
+temp = getDepthMatrix(sims,length(L.R))
+df = DataFrame(transpose(temp), :auto)
+rename!(df,[string(z)*"-"*string(t) for (z,t) in zip(sims.Zmer,sims.Time)])
+CSV.write(wdir("data/")*"depthMatrixContinuous.csv", df)
+
+
 using GLMakie
 j=1
 i=1
 oParticle = Sphere(Point3f0(positionTuple(par.obj)),par.obj.radius) 
 oRadical = Observable( Sphere(Point3f0( Tuple(vec(sims.P[i,j])) ),sims.Zmer[i,j]*0.4) )
 # GLMakie.wireframe(oParticle)
-mesh(oParticle, color = (:grey), shading=true,overdraw=true,lightposition = Vec3f0(-150,150,100)) #
-C = range(HSV(0,1,1), stop=HSV(-360,1,1), length=length(par.L.R)+1);
+C = range(HSV(-120,1,1), stop=HSV(-360,1,1), length=length(par.L.R));
+mesh(oParticle, color = last(C), shading=true,overdraw=true,lightposition = Vec3f0(-150,150,100)) #
 for l in length(par.L.R):-1:2
-    mesh!(Sphere(Point3f0(positionTuple(par.obj)),par.L.R[l]), color = (C[l]),overdraw=true,lightposition = Vec3f0(-150,150,100)) # ,overdraw=true
+    mesh!(Sphere(Point3f0(positionTuple(par.obj)),par.L.R[l]), color = (C[l-1]),overdraw=true,lightposition = Vec3f0(-150,150,100)) # ,overdraw=true
 end
-mesh!(oRadical, color = last(C) , overdraw=true)
+mesh!(oRadical, color = :black , overdraw=true)
 fps = 60
 secs = 30
 I = [1;round.(Int,range(0,1,secs*fps)[Not(1)] .* length(sims.Time))]

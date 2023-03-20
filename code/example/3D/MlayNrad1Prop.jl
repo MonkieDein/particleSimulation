@@ -26,7 +26,7 @@ Time_all = []
 depth_all = []
 Zindex = [0]
 # Zmer length (Different for each monomer): 
-ZmerRange = 4:12
+ZmerRange = 4:6
 τ = MinTimeForStepsize(maxStepLength,par.L.D,Wp,minimum(ZmerRange),confident=0.9)  
 for lZmerl in ZmerRange
 
@@ -69,10 +69,16 @@ end
     
 Sims_all = (P=P_all,V=V_all,Zmer=Zmer_all,Time=Time_all,minL=minL_all)
     
-# velocityBoxPlot(Sims_all,par,τ) |> display
+velocityBoxPlot(Sims_all,par,τ) |> display
 # savefig("plots/Mlayer3D/bindVelocityBoxPlot.png")
 
 depplt = sampleDepthPlot(
     Sims_all,length(L.R),length(ZmerRange),Zindex[2],ZmerRange[1];
     X = 1:length(Sims_all.Time),Z = Zindex  ) |> display
 # savefig("plots/Mlayer3D/bindDeepestSamples.png")
+
+# get and save Depth matrix into a file
+temp = getDepthMatrix(Sims_all,length(L.R);Z = Zindex)
+df = DataFrame(temp', :auto)
+rename!(df,[string(z)*"-"*string(t) for (z,t) in zip(Sims_all.Zmer,Sims_all.Time)])
+CSV.write(wdir("data/")*"depthMatrix1Prop.csv", df)

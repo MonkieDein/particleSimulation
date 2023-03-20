@@ -3,6 +3,28 @@ using Plots
 using Colors
 using CSV
 
+function getDepthMatrix(sims,lLl;Z=[])
+    lTl = length(sims.Time)
+    N = size(sims.P,2)
+    Layers = ones(Int,(lTl,N)) .+ lLl
+    sortLayers = ones(Int,(lTl,N)) .+ lLl
+    if isempty(Z)
+        for i in 1:lTl
+            Layers[i,:] = min.(Layers[max(i-1,1),:],sims.minL[i,:])
+            sortLayers[i,:] = sort(copy(Layers[i,:]))
+        end
+    else
+        n = length(Z)
+        for z_i in 2:n
+            for i in (Z[z_i-1]+1):(Z[z_i])
+                Layers[i,:] = min.(Layers[max(i-1,Z[z_i-1]+1),:],sims.minL[i,:])
+                sortLayers[i,:] = sort(copy(Layers[i,:]))
+            end
+        end
+    end
+    return sortLayers
+end
+
 function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl;X=sims.Time,Z=[],ntick=1,
     colors = range(HSV(-120,1,1), stop=HSV(-360,1,1), length=lLl))
     lTl = length(sims.Time)
@@ -17,7 +39,8 @@ function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl;X=sims.Time,Z=[],ntick=
             # Nreach[i] = sum(Layers[i,:] .== 1)
         end
     else
-        for z_i in 2:length(Z)
+        n = length(Z)
+        for z_i in 2:n
             for i in (Z[z_i-1]+1):(Z[z_i])
                 Layers[i,:] = min.(Layers[max(i-1,Z[z_i-1]+1),:],sims.minL[i,:])
                 sortLayers[i,:] = sort(copy(Layers[i,:]))
@@ -120,7 +143,7 @@ function velocityBoxPlot(sims,par,τ;center=[0.0,0,0],bar_width = 0.8,qs = [0.05
                 AddVelocityBoxPlot(
                     bp,Q,rmsv,Ermsv[z-minimum(uZ)+1,layer],[w1,w2];
                     linewidth = 1,rmsw= 2,label = "",
-                    ls=:solid,lc=:red,lb=:black,fill=colors[layer]
+                    ls=:solid,lc=:black,lb=:black,fill=colors[layer]
                 )
             end
         end
@@ -129,7 +152,7 @@ function velocityBoxPlot(sims,par,τ;center=[0.0,0,0],bar_width = 0.8,qs = [0.05
         BoxShape(bp,(minimum(uZ) .- [100,99]),(maximum(VtMat)*10 .+ [1,2]);
         bw= 1,c = colors[l],label="Layer-"*string(l)*" IQR")
     end
-    scatter!(bp,[],[],label="Expected RMS",m=:cross,color=:red)
+    scatter!(bp,[],[],label="Expected RMS",m=:cross,color=:black)
     scatter!(bp,[],[],label="Simulate RMS",m=:xcross,color=:black)
     scatter!(bp,[],[],label=string(round(Int,last(qs)*100))*"%-quantile",m=:dtriangle,color=:white,linewidth =1)
     scatter!(bp,[],[],label=string(round(Int,first(qs)*100))*"%-quantile",m=:utriangle,color=:white,linewidth =1)
