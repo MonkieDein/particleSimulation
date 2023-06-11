@@ -193,8 +193,8 @@ function getPropStats(wpInit,reactionTemp,endTime,nProp; wpEnd = 1.0, startTime=
 end
 
 #TODO: need to figure out how to get total time elapsed
-function simulate(propTime::Observable{Float64},
-    Time::Vector{Any},par::mLparticle,Rad::Vector{Radicle},
+function simulate(propTime::Observable{Float64},Wp::Observable{Float64},
+    zmer::Observable{Int},Time,par::mLparticle,Rad::Vector{Radicle},
     wpInit::Float64,linReactEndTime::Float64;
     wpEnd=1.0,startTime=0.0,
     wallCollideDo = "reflect", eachStepDo ="random")

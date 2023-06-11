@@ -36,7 +36,7 @@ for rad in Rad
 end
 
 # Run simulations
-sims = simulate(propTime,cumsum(propStats.times),par,Rad,wpInit,endWpTime,
+sims = simulate(propTime,Wp,zmer,cumsum(propStats.times),par,Rad,wpInit,endWpTime,
 wpEnd=wpEnd,startTime=startWpTime,wallCollideDo="random",eachStepDo ="random")
 
 depthHistogramAnim(sims,par,colPalette = :cool,fps=60,videoName="animation/3D/depthHistogramAnimViaProp.mp4")
