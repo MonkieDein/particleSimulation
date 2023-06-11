@@ -39,13 +39,14 @@ C = [parse(Colorant,"0x22"*c[3:8]) for c in hexC ]
 oParticle = Sphere(Point3f0(positionTuple(par.obj)),par.obj.radius) 
 
 # GLMakie.wireframe(oParticle)
-radplotsize = 1 # sims.Zmer[1,j]*0.4
+radicalRadius = 1 # sims.Zmer[1,j]*0.4
 nRad = N
-oRadical = [Observable( Sphere(Point3f0( Tuple(vec(sims.P[1,j])) ),radplotsize) ) for j in 1:nRad]
+oRadical = [Observable( Sphere(Point3f0( Tuple(vec(sims.P[1,j])) ),radicalRadius) ) for j in 1:nRad]
 oRadCol = [Observable( radC[L2CMat[1,j]] ) for j in 1:nRad]
 
 fig = mesh(oParticle, color = last(C), shading=true,overdraw=true,lightposition = Vec3f0( -50,100,150 ) ,show_axis=false) #
 # ,transparency = true
+display(fig)
 for l in length(par.L.R):-1:2
     mesh!(Sphere(Point3f0(positionTuple(par.obj)),par.L.R[l]), color = (C[l-1]),overdraw=true,lightposition = Vec3f0( -50,100,150 ) ) #,lightposition = Vec3f0(150,150,100) ,overdraw=true
 end
@@ -55,15 +56,14 @@ for j in 1:nRad
 end
 
 fps = 60
-# secs = 30
-# I = [1;round.(Int,range(0,1,length =secs*fps)[Not(1)] .* length(sims.Time))]
-frames = 1:length(sims.Time) # 1:length(I)#
-record(fig,"/animation/3D/video3D.mp4",frames;framerate = fps) do i #f #
-# for (i,t) in ProgressBar(enumerate(sims.Time)) #i in I #
+secs = length(sims.Time)/fps # 30
+I =  round.(Int,range(0,1,round(Int,secs*fps)+1)[Not(1)] .* length(sims.Time))
+record(fig,"animation/3D/video3D.mp4",I;framerate = fps) do i
+# for i in ProgressBar(I)
     # i = I[f]
     for j in 1:nRad
         oRadCol[j][] = radC[L2CMat[i,j]]
-        oRadical[j][] = Sphere(Point3f0( Tuple(vec(sims.P[i,j])) ),radplotsize)
+        oRadical[j][] = Sphere(Point3f0( Tuple(vec(sims.P[i,j])) ),radicalRadius)
     end
     # sleep(1e-10) # sleep is required for the plot to update in realtime
 end

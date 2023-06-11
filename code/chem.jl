@@ -66,15 +66,12 @@ end
 function LayerTransitionUpdate(particle::mLparticle,radicle::Radicle,l::Int)
     d = normalize( vec(particle.obj.p) .- vec(radicle.obj.p) )
     v = normalize( vec(radicle.obj.v) ) 
-    # println(radicle.obj)
-    # println(" the dot prodcut ", dot(d,v))
     radicle.l = max( 1,l - (dot(d,v) > 0) ) # If dot product > 0 means going toward the center
-    # println(" the layer ",radicle.l)
     updateRadicle(particle,radicle) # Update radicle new layer information
 end
 
 # If postTransition is True ⟹ min is zero and we already update the transition
-function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTransition = false,fromOuter = false)  
+function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTransition = false)  
     tempΔt = Δt
     minL = radicle.l
     while tempΔt > 0
@@ -84,15 +81,11 @@ function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTr
         l = (1 + partialsortperm( I, (1 + postTransition) )) ÷ 2
         transition_time = I[partialsortperm( I, (1 + postTransition) )]
         if transition_time == 0        # Transitional update
-            # println("transitional update")
             LayerTransitionUpdate(particle,radicle,l)
             L = multiLbounceStepUpdate(particle,radicle,tempΔt,postTransition = true)
             minL = min(L,minL)
             tempΔt = 0
         elseif transition_time < 1     # Intersect with another Layer 
-            # println("intersection update")
-            # println("transition_time x tempΔt:",transition_time * tempΔt)
-            # println(radicle.obj)
             preUpdatePosition = vec(radicle.obj.p)
             updateMotion(radicle.obj,transition_time* tempΔt)
             # if updateMotion is way too small, no positional change
@@ -111,8 +104,6 @@ function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTr
             # FP addition is not associative, transition update is necessary to avoid surpass layer
             LayerTransitionUpdate(particle,radicle,l)
         else                           # Collide on particle wall
-            # println("collsionNreflection")
-            # println(radicle.obj)
             colission = collisionNreflection(particle.obj,radicle.obj,tempΔt)
             updateMotion(radicle.obj,colission.time * tempΔt)
             if (colission.time < 1)
@@ -124,6 +115,7 @@ function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTr
     end
     return(minL)
 end
+
 
 # Propagation Time for Monomer
 function propagationTimeInterval(Wp,TempInC)

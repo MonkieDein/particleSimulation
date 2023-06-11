@@ -58,7 +58,8 @@ function sampleDepthPlot(sims,lLl,lPropl,propTime,lZmerl;X=sims.Time,Z=[],ntick=
     # Add customize axis label
     if !isempty(Z)
         plot!(pltProb,xticks = [])
-        for z_i in 2:length(Z)
+        zn = length(Z)
+        for z_i in 2:zn
             XR = round.(Int,range(Z[z_i-1]+1,Z[z_i],ntick+2))
             for x in XR[2:2+ntick-1]
                 plot!(pltProb,[x,x],[0,1],color=:black,label="")

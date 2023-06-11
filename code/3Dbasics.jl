@@ -30,6 +30,12 @@ function L2(point::coord)
     return( sqrt(sum(vec(point) .^ 2)) )
 end
 
+function from3Dto2D(point::coord)
+    r = L2(point)
+    θ = atan(point.y, point.x)
+    return coord( -r .* [cos(θ),sin(θ),0] ) 
+end
+
 mutable struct Square
     p :: coord # position of shape
     v :: coord # velocity of shape
@@ -66,23 +72,28 @@ function DistanceSquare(p1::Vector{Float64},p2::Vector{Float64})
 end
 
 function L2Distance(p1::Vector{Float64},p2::Vector{Float64})
-    return sqrt( sum( (p1 .- p2) .^ 2) )
+    return sqrt( DistanceSquare(p1,p2) )
+end
+
+function random_position(obj;size = L2Distance(vec(obj.p),zeros(3)))
+    ϕ = rand(Uniform(0,2π))
+    cosθ = rand(Uniform(-1,1))
+    θ = acos( cosθ )
+    obj.p =  coord(size .* [ sin(θ)*cos(ϕ) , sin(θ)*sin(ϕ) , cos(θ)])
 end
 
 function random_direction(obj;size = L2Distance(vec(obj.v),zeros(3)))
     ϕ = rand(Uniform(0,2π))
     cosθ = rand(Uniform(-1,1))
     θ = acos( cosθ )
-    obj.v.x = size * sin(θ) * cos(ϕ)
-    obj.v.y = size * sin(θ) * sin(ϕ)
-    obj.v.z = size * cos(θ)
+    obj.v =  coord(size .* [ sin(θ)*cos(ϕ) , sin(θ)*sin(ϕ) , cos(θ)])
 end
 
-function random_velocity(obj,size)
+function random_velocity(obj,size) # got use
     obj.v = coord(size .* randn(3))
 end
 
-function updateMotion(obj,Δt)
+function updateMotion(obj,Δt) # got use
     # update position
     obj.p = coord( vec(obj.p) .+ vec(obj.v) .* Δt )
     # update velocity
@@ -128,7 +139,7 @@ end
 # : 0 ⟹ center intersection 
 # t[1] ⟹ intersection from inner circle
 # t[2] ⟹ intersection from outer circle
-function intersections(Center, R, ball, Δt;collide=0)
+function intersections(Center, R, ball, Δt;collide=0) # got use
     ball1 =  vec(ball.p) .+ vec(ball.v) .* Δt 
     t = [1.0,1]
     # Solve for t : x = t x₁ + ( 1 - t ) x₀ ;  y = t y₁ + ( 1 - t ) y₀ ;
@@ -150,7 +161,27 @@ function intersections(Center, R, ball, Δt;collide=0)
     return(t)
 end
 
-function collisionNreflection(particle::Round,ball::Round,Δt)
+
+function closestDistance(P::Vector{Float64}, A::Vector{Float64}, B::Vector{Float64})
+    AP = P .- A
+    AB = B .- A
+    
+    dot = sum(AP .* AB)
+    lenL = L2Distance(A,B)
+
+    # when AB is just a line with 0 len (i.e. a point), then just return the distance
+    if lenL ≤ 0.0
+        return L2Distance(A,P)
+    end
+    t = dot / (lenL^2)
+    # since we looking at a line segment we need to clip t to be within A (0) and B (1).
+    # C is a point on the line segment that is closest to the point P. 
+    C = A .+ AB .* min(max(t,0.0),1.0) 
+    return L2Distance(C,P)
+end
+
+
+function collisionNreflection(particle::Round,ball::Round,Δt) # got use
     ball1 =  vec(ball.p) .+ vec(ball.v) .* Δt 
     if ( L2Distance(vec(particle.p),ball1) ≥ (particle.radius - ball.radius) )
         t = intersections(vec(particle.p), particle.radius, ball, Δt,collide = -1)[1]
