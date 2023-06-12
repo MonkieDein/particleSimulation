@@ -40,7 +40,7 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
     zmerInit = 4
     maxStepLength = 50 # minimum(diff(par.layerR[])) # 40 #
     zmer = Node(zmerInit)
-    τ =   Node(min(MinTimeForStepsize(maxStepLength,par.layerD[],wpInit,zmerInit,confident=0.9),T/5)  ) # Node(T/10000) #
+    τ =   Node(min(MinTimeForStepsize(maxStepLength,par.layerD[],wpInit,zmerInit,confident=0.9),T/100)  ) # Node(T/10000) #
     radRadius = 0.75
     Rad = [Radicle([par.obj.radius-radRadius*1.1,0,0],par,r=radRadius,zmer = zmer,τ = τ) for n in 1:N]
     for rad in Rad
@@ -87,4 +87,9 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
 
 end
 # end
+
+using DelimitedFiles
+writedlm( "data/"*string(Tgvalues[1])*".csv",  Vs[1,:,:], ',')
+writedlm( "data/"*string(Tgvalues[2])*".csv",  Vs[2,:,:], ',')
+writedlm( "data/"*string(Tgvalues[3])*".csv",  Vs[3,:,:], ',')
 
