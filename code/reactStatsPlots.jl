@@ -44,7 +44,7 @@ function anim2D(sims,par,τ;radicalRadius = 0.5,fps=60,secs=length(sims.Time)/fp
     
     N = size(sims.P)[2]
     pos2D = [from3Dto2D(p) for p in sims.P]
-    particles = [circumference(par.obj.p.x , par.obj.p.y , R) for R in reverse([layerR[][Not(1)];par.obj.radius])]
+    particles = [circumference(par.obj.p.x , par.obj.p.y , R) for R in reverse([par.layerR[][Not(1)];par.obj.radius])]
     I =  round.(Int,range(0,1,round(Int,secs*fps)+1)[Not(1)] .* length(sims.Time))
     video = @animate for i in ProgressBar(I) # 
         plt = Plots.plot(legend=:outerright , xlim=(-par.obj.radius,par.obj.radius), ylim=(-par.obj.radius,par.obj.radius), 

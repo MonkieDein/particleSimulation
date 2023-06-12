@@ -109,27 +109,28 @@ function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTr
         l = (1 + partialsortperm( I, (1 + postTransition) )) ÷ 2
         transition_time = I[partialsortperm( I, (1 + postTransition) )]
         if transition_time == 0        # Transitional update
+            # println("Transition update",tempΔt)
             LayerTransitionUpdate(particle,radicle,l)
             Depth = multiLbounceStepUpdate(particle,radicle,tempΔt,postTransition = true,wallCollideDo = wallCollideDo)
             minDepth = min(Depth,minDepth)
             tempΔt = 0
         elseif transition_time < 1     # Intersect with another Layer 
+            # println("Intersect with another Layer ",tempΔt ," position ",vec(radicle.obj.p)," trans time ", transition_time)
             preUpdatePosition = vec(radicle.obj.p)
+            preL2 = L2(radicle.obj.p)
             updateMotion(radicle.obj,transition_time* tempΔt)
+            tempΔt -= transition_time * tempΔt
             # if updateMotion is way too small, no positional change
-            # handle 1e16 loop -> incremental position of highest velocity axis
-            if sum(abs.(vec(radicle.obj.p) .- preUpdatePosition)) == 0 
-                V = vec(radicle.obj.v)
-                (v,i) = findmax(abs.(V))
-                if V[i] > 0
-                    preUpdatePosition[i] = nextfloat(preUpdatePosition[i])
-                else
-                    preUpdatePosition[i] = prevfloat(preUpdatePosition[i])
-                end
-                radicle.obj.p = coord(preUpdatePosition)
+            # handle 1e16 loop -> make a tiny jump instead
+            if ( ((sum(abs.(vec(radicle.obj.p) .- preUpdatePosition)) == 0) || (L2(radicle.obj.p) == preL2 ) ) && 
+                (transition_time < 1e-10) )
+                # println("eps intersect",tempΔt)
+                jumptime = min(1/(L2(radicle.obj.v)*1e8),tempΔt/1e10)
+                updateMotion(radicle.obj,jumptime)
+                tempΔt -= jumptime
             end
             minDepth = min(minDepth,closestDistance(Center,InitPoint,vec(radicle.obj.p)))
-            tempΔt -= transition_time * tempΔt
+            
             # FP addition is not associative, transition update is necessary to avoid surpass layer
             LayerTransitionUpdate(particle,radicle,l)
         else                           # Collide on particle wall
@@ -141,10 +142,12 @@ function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTr
                     radicle.obj.v = colission.reflection
                 elseif wallCollideDo == "rand_dir"
                     while L2Distance(vec(particle.obj.p),vec(radicle.obj.p) .+ (vec(radicle.obj.v) ./ (L2(radicle.obj.v) * 1e8)) ) ≥ (particle.obj.radius - radicle.obj.radius)
+                        # println("rand_dir on wall collision",tempΔt)
                         radicle.obj.v = random_direction(radicle.obj,size=radicle.σx[])
                     end
                 elseif wallCollideDo == "random"
                     while L2Distance(vec(particle.obj.p),vec(radicle.obj.p) .+ (vec(radicle.obj.v) ./ (L2(radicle.obj.v) * 1e8)) ) ≥ (particle.obj.radius - radicle.obj.radius)
+                        # println("random on wall collision",tempΔt)
                         radicle.obj.v = random_velocity(radicle.obj,radicle.σx[])
                     end
                 end
@@ -230,7 +233,7 @@ function simulate(propTime::Observable{Float64},Wp::Observable{Float64},
         tempτ = τs[i]
         while (tnextP ≤ t  + tempτ) 
             prePropTime = tnextP - t # remaining time before propagation
-            # println("time step: ",tempτ,"\t ",prePropTime)
+            # # println("time step: ",tempτ,"\t ",prePropTime)
             # Step Update remaining time before propagation
             for (j,rad) in enumerate(Rad)
                 # ----- udpate position before propagation -----
