@@ -9,12 +9,12 @@ histCounts = []
 N = 1000                                                                                   # N : NumberOfRadical
 Vs = fill(0.0,(length(Tgvalues),length(wpInitsArray),N))
 histograms = []
-# for (ntg,tgv) in enumerate(Tgvalues)
-ntg = 1
-tgv = Tgvalues[ntg]
-# for (nwp,wpInit) in enumerate(wpInitsArray)
-nwp = 1
-wpInit = wpInitsArray[nwp]
+for (ntg,tgv) in enumerate(Tgvalues)
+# ntg = 3
+# tgv = Tgvalues[ntg]
+for (nwp,wpInit) in enumerate(wpInitsArray)
+# nwp = 2
+# wpInit = wpInitsArray[nwp]
 # Multi Layer Particle variables
 wpEnd = 1.0                                      # initial Wp values
 startWpTime , endWpTime = 0.0 , 30*60.0                        # linear Relationship Wp reaction end Time
@@ -63,17 +63,17 @@ values = sort(collect(keys(counts)))
 frequencies = [counts[value] for value in values]
 probability = frequencies ./ sum(frequencies)
 barplot = bar(values, probability, xlabel="Layer", ylabel="Probability",ylim=(0,1.0), legend=false, 
-title="Histogram of radicles time spend in each Layer",xticks=1:(length(layerRadisArray)-1))
+title="Histogram of radicles time spend in each Layer",xticks=1:(length(layerRadisArray)-1),xlim=(0.5,length(layerRadisArray)-0.5))
 savefig(barplot,wdir("plots/MlayerChgWp/Cliff/TimeSpend/")*string(wpInit)*"-wp-Layer-tg-"*string(tgv)*".png")
 
 v = reduce(vcat,simsL2)
 num_bins = max(1,Int(floor(maximum(v) - minimum(v))))
-his = Plots.histogram(v, normalize=true,bins=num_bins, legend=false,xticks=0:5:layerRadisArray[length(layerRadisArray)],
+his = Plots.barhist(v, normalize=true,bins =num_bins, legend=false,xticks=0:5:layerRadisArray[length(layerRadisArray)],
 ytick=0:0.1:1.0,ylim=(0,1.0),xlim=(0,layerRadisArray[length(layerRadisArray)]), xlabel="Distance (nm) from center", 
 ylabel="Probability", title="Histogram of radicles time spend in each Distance")
 
 savefig(his,wdir("plots/MlayerChgWp/Cliff/TimeSpend/")*string(wpInit)*"-wp-Dist-tg-"*string(tgv)*".png")
 
-# end
-# end
+end
+end
 
