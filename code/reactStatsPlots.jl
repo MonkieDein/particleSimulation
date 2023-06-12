@@ -268,7 +268,7 @@ function velocityBoxPlot(sims,par,propStats,reactionTemp,Tg₀,τ;
 
     # Initialize limits and lzmerl from samples.
     layerLims = [par.layerR[];par.obj.radius]
-    uZ = unique(sims.Zmer)
+    uZ = collect(minimum(sims.Zmer)-1 .+ (1:length(propStats.wps)))
 
     # Calculating expected velocity # For Tg change with Wp : use (reactionTemp .- updateTg($Wp,Tg₀,Tmon))
     deltaDs = permutedims(hcat([[10^logD(wp,t,unit="nm") for t in (reactionTemp .- Tg₀)] for wp in propStats.wps]...))
