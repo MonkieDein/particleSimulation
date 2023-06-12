@@ -6,11 +6,10 @@ wpInitsArray = [0.783,0.822,0.858,0.887,0.893,0.909,0.919,0.926,0.936] # LinRang
 layerRadisArray = [0,51,57.19,62.11,66.21,69.76,72.89,75.72,78.31,80.68,82.88] #round.(Int,)
 Tgvalues = [25.4,45.1,102.1]
 histCounts = []
-Vs = fill(0.0,(length(Tgvalues),length(wpInitsArray),100))
+N = 1000                                                                                   # N : NumberOfRadical
+Vs = fill(0.0,(length(Tgvalues),length(wpInitsArray),N))
 histograms = []
-# for (ntg,tgv) in enumerate(Tgvalues)
-ntg=3
-tgv=Tgvalues[ntg]
+for (ntg,tgv) in enumerate(Tgvalues)
 for (nwp,wpInit) in enumerate(wpInitsArray)
     # Multi Layer Particle variables
     wpEnd = 1.0                                      # initial Wp values
@@ -36,11 +35,10 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
     T = propStats.T                                                                     # T        : Total simulation time interval
 
     # initialize Radicles
-    N = 100                                                                                   # N : NumberOfRadical
     zmerInit = 4
     maxStepLength = 50 # minimum(diff(par.layerR[])) # 40 #
     zmer = Node(zmerInit)
-    τ =   Node(min(MinTimeForStepsize(maxStepLength,par.layerD[],wpInit,zmerInit,confident=0.9),T/100)  ) # Node(T/10000) #
+    τ =   Node(T/1000) # Node(MinTimeForStepsize(maxStepLength,par.layerD[],wpInit,zmerInit,confident=0.9)  ) #
     radRadius = 0.75
     Rad = [Radicle([par.obj.radius-radRadius*1.1,0,0],par,r=radRadius,zmer = zmer,τ = τ) for n in 1:N]
     for rad in Rad
@@ -75,8 +73,9 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
     info = getTimeMinMatrix(sims,par.obj.radius,Vars=sims.minDepth)
 
     v = info.sortedValues[size(info.sortedValues)[1],:]
-    num_bins = Int(ceil(maximum(v) - minimum(v)))
-    his = Plots.histogram(v, normalize=true,bins=num_bins,xlim=(0,layerRadisArray[length(layerRadisArray)]))
+    num_bins = Int(floor(maximum(v) - minimum(v)))
+    his = Plots.histogram(v, normalize=true,bins=num_bins,xticks=0:5:layerRadisArray[length(layerRadisArray)],
+    ytick=0:0.1:1.0,ylim=(0,1.0),xlim=(0,layerRadisArray[length(layerRadisArray)]))
     # h = fit(Histogram, v, nbins=num_bins).weights
 
     # push!(histCounts,h)
@@ -86,10 +85,14 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
     savefig(his,wdir(wdir("plots/MlayerChgWp/"*string(wpInit))*'/'*string(tgv))*"/DeepestHistogram.png")
 
 end
-# end
+end
 
 using DelimitedFiles
 writedlm( "data/"*string(Tgvalues[1])*".csv",  Vs[1,:,:], ',')
 writedlm( "data/"*string(Tgvalues[2])*".csv",  Vs[2,:,:], ',')
 writedlm( "data/"*string(Tgvalues[3])*".csv",  Vs[3,:,:], ',')
 
+v = Vs[3,9,:]
+num_bins = Int(floor(maximum(v) - minimum(v)))
+Plots.histogram(v, normalize=true,bins=num_bins,xticks=0:5:layerRadisArray[length(layerRadisArray)],
+ytick=0:0.1:1.0,ylim=(0,1.0),xlim=(0,layerRadisArray[length(layerRadisArray)]))
