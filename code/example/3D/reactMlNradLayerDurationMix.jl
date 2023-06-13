@@ -62,10 +62,10 @@ counts = countmap(reduce(vcat,simsLayer))
 values = sort(collect(keys(counts)))
 frequencies = [counts[value] for value in values]
 duration = frequencies ./ sum(frequencies) .* T
-barplot = bar(values, duration, xlabel="Layer", ylabel="Duration (second)",ylim=(0,T), label = "Histogram", 
+barplot = bar(values, duration, xlabel="Layer", ylabel="Duration (second)",ylim=(0,maximum(duration)*1.2), label = "Histogram", 
 title="Histogram of radicles time spend in each Layer",xticks=1:(length(layerRadisArray)-1),xlim=(0.5,length(layerRadisArray)-0.5))
 for l in 1:length(layerRadius)
-    BoxShape(barplot,[l-0.5,l+0.5],[0,T];bw= 1,lc=plot_color(colors[l], 0.1),c = plot_color(colors[l], 0.1))
+    BoxShape(barplot,[l-0.5,l+0.5],[0,T*1.2];bw= 1,lc=plot_color(colors[l], 0.1),c = plot_color(colors[l], 0.1))
 end
 for tgval in 1:length(Tgvalues)
     BoxShape(barplot,[-4,-5],[-4,-5];bw= 1,lc=plot_color(colorpalletes[tgval], 0.1),c = plot_color(colorpalletes[tgval], 0.1),label="Tg: "*string(Tgvalues[tgval])*"°C")
@@ -81,10 +81,10 @@ counts = countmap(v)
 values = sort(collect(keys(counts)))
 frequencies = [counts[value] for value in values]
 duration = frequencies ./ sum(frequencies) .* T
-his = bar(values, duration, xlabel="Distance (nm)", ylabel="Duration (second)",ylim=(0,T), label = "Histogram", 
+his = bar(values, duration, xlabel="Distance (nm)", ylabel="Duration (second)",ylim=(0,maximum(duration)*1.2), label = "Histogram", 
 title="Histogram of radicles time spend in each Distance",xticks=0:5:layerRadisArray[length(layerRadisArray)],xlim=(0,layerRadisArray[length(layerRadisArray)]))
 for l in 1:length(layerRadius)
-    BoxShape(his,layerRadisArray[[l,l+1]],[0,T];bw= 1,lc=plot_color(colors[l], 0.1),c = plot_color(colors[l], 0.1))
+    BoxShape(his,layerRadisArray[[l,l+1]],[0,T*1.2];bw= 1,lc=plot_color(colors[l], 0.1),c = plot_color(colors[l], 0.1))
 end
 for tgval in 1:length(Tgvalues)
     BoxShape(his,[-4,-5],[-4,-5];bw= 1,lc=plot_color(colorpalletes[tgval], 0.1),c = plot_color(colorpalletes[tgval], 0.1),label="Tg: "*string(Tgvalues[tgval])*"°C")
