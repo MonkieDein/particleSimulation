@@ -32,7 +32,7 @@ propStats = getPropStats(wpInit,reactionTemp,endWpTime,lPropl,
 T = propStats.T                                                                     # T        : Total simulation time interval
 
 # initialize Radicles
-N = 1000                                                                                   # N : NumberOfRadical
+N = 100                                                                                   # N : NumberOfRadical
 zmerInit = 4
 maxStepLength = 30 # minimum(diff(par.layerR[])) # 40 #
 zmer = Node(zmerInit)
