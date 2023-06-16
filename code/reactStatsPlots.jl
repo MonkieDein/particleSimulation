@@ -62,7 +62,7 @@ end
 function anim3D(sims,par;radicalRadius = 0.5,fps=60,secs=length(sims.Time)/fps,
     videoName="animation/3D/Makie3Danimation.mp4",
     radC = palette(:cool, par.layerR[]), #range(HSV(-120,1,1), stop=HSV(-360,1,1), length=length(par.layerR[]))
-    C = [parse(Colorant,"0x33"*c[3:8]) for c in [hex(c,:AARRGGBB) for c in palette(:cool, par.layerR[])] ])
+    C = [parse(Colorant,"0x33"*c[3:8]) for c in [hex(c,:AARRGGBB) for c in radC] ])
     
     N = size(sims.P)[2]
     L2CMat = [searchsortedlast(par.layerR[],L2Distance(vec(par.obj.p),vec(rad_p))) for rad_p in sims.P]
@@ -171,9 +171,9 @@ function depthPlot(sims,par,lLl,lPropl,propStats,lZmerl;X=sims.Time,Z=[],ntick=1
 end
 
 function depthHistogramAnim(sims,par;colPalette = :cool,fps=60,secs=length(sims.Time)/fps,
-    videoName="animation/3D/depthHistogramAnim.mp4",minimum = true)
-    lLl = length(par.layerR[])
-    colors = palette(colPalette,lLl)
+    videoName="animation/3D/depthHistogramAnim.mp4",minimum = true,lLl = length(par.layerR[]),
+    colors = palette(colPalette,lLl))
+    
     N = size(sims.P,2)
     layerLims = [par.layerR[];par.obj.radius]
     radius=par.obj.radius
@@ -200,7 +200,7 @@ function depthHistogramPlot(values,i,layerLims,sims,par;radius=par.obj.radius,N 
     colors = palette(:cool,lLl),title="Radicle Closest distance from Center Histogram")
 
     # standard histogram plots
-    plt = Plots.histogram(values, label = "Histogram",bins=range(0, radius, length=21),
+    plt = Plots.histogram(values, label = "Histogram",bins=max(1,Int(floor(maximum(values) - minimum(values)))),
     xlabel = "Distance (nm)",ylabel = "Number of samples",title=title,xlims = (0,radius),ylims = (0,N))
     
     # Write time and zmer length
