@@ -2,23 +2,21 @@ include("../../reactChem.jl")
 include("../../reactStatsPlots.jl")
 using StatsBase
 
-wpInitsArray = [0.8,0.95] 
-layerRadisArray = [0,51,57.19,62.11,66.21,69.76,72.89,75.72,78.31,80.68,82.88] #round.(Int,)
-Tgvalues = [25.4,45.1,102.1]
+wpInitsArray = [0.75] # [0.8,0.95] 
+layerRadisArray = [0,60,70] #round.(Int,)
+Tgvalues = [25.4] # [25.4,45.1,102.1]
 histCounts = []
+increments = collect(0:10:20)
 N = 1000                                                                                   # N : NumberOfRadical
 Vs = fill(0.0,(length(Tgvalues),length(wpInitsArray),N))
 histograms = []
 for (ntg,tgv) in enumerate(Tgvalues)
-# ntg = 3
-# tgv = Tgvalues[ntg]
 for (nwp,wpInit) in enumerate(wpInitsArray)
-# nwp = 2
-# wpInit = wpInitsArray[nwp]
+for incr in increments
 # Multi Layer Particle variables
 wpEnd = 1.0                                      # initial Wp values
 startWpTime , endWpTime = 0.0 , 30*60.0                        # linear Relationship Wp reaction end Time
-parRadius = layerRadisArray[length(layerRadisArray)]                           # particle radius
+parRadius = layerRadisArray[length(layerRadisArray)]+incr                           # particle radius
 reactionTemp = 70                                               # T : Reaction Temparature (°C)
 layerRadius = layerRadisArray[1:(length(layerRadisArray)-1)]    # 2 # (1+nwp)
 Tg₀ = fill(tgv,size(layerRadius))                              # initial Tg
@@ -64,7 +62,7 @@ frequencies = [counts[value] for value in values]
 duration = frequencies ./ sum(frequencies) .* T
 barplot = bar(values, duration, xlabel="Layer", ylabel="Duration (second)",ylim=(0,T), label = "", 
 title="Histogram of radicles time spend in each Layer",xticks=1:(length(layerRadisArray)-1),xlim=(0.5,length(layerRadisArray)-0.5))
-savefig(barplot,wdir("plots/MlayerChgWp/Cliff/TimeSpend/")*string(wpInit)*"-wp-Layer-tg-"*string(tgv)*".png")
+savefig(barplot,wdir("plots/MlayerChgWp/Cliff/LenLimit/")*string(wpInit)*"-wp-Layer-tg-"*string(tgv)*"Radius"*string(parRadius)*".png")
 
 ########################################################################
 v = floor.(Int,reduce(vcat,simsL2))
@@ -74,10 +72,10 @@ counts = countmap(v)
 values = sort(collect(keys(counts)))
 frequencies = [counts[value] for value in values]
 duration = frequencies ./ sum(frequencies) .* T
-his = bar(values, duration, xlabel="Distance (nm)", ylabel="Duration (second)",ylim=(0,T), label = "", 
-title="Histogram of radicles time spend in each Distance",xticks=0:5:layerRadisArray[length(layerRadisArray)],xlim=(0,layerRadisArray[length(layerRadisArray)]))
-savefig(his,wdir("plots/MlayerChgWp/Cliff/TimeSpend/")*string(wpInit)*"-wp-Dist-tg-"*string(tgv)*".png")
-
+his = bar(values, duration, xlabel="Distance (nm)", ylabel="Duration (second)",ylim=(0,T/10), label = "", 
+title="Histogram of radicles time spend in each Distance",xticks=0:5:(layerRadisArray[end]+increments[end]),xlim=(0,(layerRadisArray[end]+increments[end])))
+savefig(his,wdir("plots/MlayerChgWp/Cliff/LenLimit/")*string(wpInit)*"-wp-Dist-tg-"*string(tgv)*"Radius"*string(parRadius)*".png")
+end
 end
 end
 
