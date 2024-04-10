@@ -357,7 +357,7 @@ end
 function wdir(folder)
     if !isempty(folder) && !ispath(folder)
         println("Create directory ("*folder*")!")
-        mkdir(folder)
+        mkpath(folder)
     end
     return(folder)
 end
