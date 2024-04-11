@@ -1,5 +1,11 @@
 include("../../reactChem.jl")
 include("../../reactStatsPlots.jl")
+
+"""
+Given radius diameter of the particle from three separate experiments,
+this experiments 
+
+"""
 using StatsBase
 
 zave1 = [0, 129.4 , 132.4 , 141.1 , 149.6 , 154.3 , 156.1 , 161.7 , 164.7 , 169.3 , 173.7 ] ./ 2
@@ -64,7 +70,7 @@ for glossy in 0:totalLayer
 
     anim2D(sims,par,τ,radicalRadius=radRadius,fps=60,videoName=wdir("animation/3D/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/3DTo2dAnim.mp4",
     C = colors)
-    anim3D(sims,par,radicalRadius=radRadius,fps=60,videoName=wdir("animation/3D/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/Makie3Danimation.mp4",radC=colors)
+    # anim3D(sims,par,radicalRadius=radRadius,fps=60,videoName=wdir("animation/3D/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/Makie3Danimation.mp4",radC=colors)
 
     dpL = depthPlot(sims,par,length(par.layerR[]),lPropl,propStats,zmerInit;X=sims.Time,Z=[],ntick=2)
     savefig(dpL,wdir("plots/MlayerChgWp/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/depthPlotLayer.png")
