@@ -2,11 +2,7 @@ include("../../reactChem.jl")
 include("../../reactStatsPlots.jl")
 using StatsBase
 
-zave1 = [0, 129.4 , 132.4 , 141.1 , 149.6 , 154.3 , 156.1 , 161.7 , 164.7 , 169.3 , 173.7 ] ./ 2
-zave2 = [0, 129.4 , 135.7 , 141.2 , 148.4 , 151.3 , 155.9 , 160.0 , 163.5 , 171.8 , 173.8 ] ./ 2
-zave3 = [0, 129.4 , 138.1 , 148.8 , 153.2 , 159.4 , 166.0 , 169.7 , 170.3 , 167.2 , 175.6 ] ./ 2
-
-layerRadisArray = (zave1 .+ zave2 .+ zave3) ./ 3 #round.(Int,)
+layerRadisArray = [0 ,64.7, 67.7, 71.85, 75.2, 77.5, 79.7, 81.9, 83.08, 84.72, 87.18 ]
 Tgvalues = [25.4,102.1]
 TgIndexes = [1;1;1;1;1;1;1;1;2;1]
 colorpalletes = palette(:cool, length(Tgvalues))
@@ -15,7 +11,7 @@ colorpalletes = palette(:cool, length(Tgvalues))
 wpInit , wpEnd = 0.8 , 1.0                                      # initial Wp values
 startWpTime , endWpTime = 0.0 , 30*60.0                         # linear Relationship Wp reaction end Time
 parRadius = layerRadisArray[length(layerRadisArray)]            # 70 # particle radius
-reactionTemp = 70                                               # T : Reaction Temparature (°C)
+reactionTemp = 80                                               # T : Reaction Temparature (°C)
 Tg₀ = Tgvalues[TgIndexes] #  [10,90,20,100,30]                  # initial Tg
 colors = colorpalletes[TgIndexes]
 Tmon = 106                                                      # monomer temp 106°C
@@ -36,7 +32,7 @@ propStats = getPropStats(wpInit,reactionTemp,endWpTime,lPropl,
 T = propStats.T                                                                     # T        : Total simulation time interval
 
 # initialize Radicles
-N = 100                                                                                   # N : NumberOfRadical
+N = 1000                                                                                   # N : NumberOfRadical
 zmerInit = 4
 maxStepLength = 30 # minimum(diff(par.layerR[])) # 40 #
 zmer = Node(zmerInit)
