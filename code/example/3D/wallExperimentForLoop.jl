@@ -1,12 +1,8 @@
 include("../../reactChem.jl")
 include("../../reactStatsPlots.jl")
-
-"""
-Given radius diameter of the particle from three separate experiments,
-this experiments 
-
-"""
 using StatsBase
+
+
 wpInitsArray = [0.783,0.822,0.858,0.887,0.893,0.909,0.919,0.926,0.936]
 overallLayerRadisArray = [0 ,64.7, 67.7, 71.85, 75.2, 77.5, 79.7, 81.9, 83.08, 84.72, 87.18 ]
 Tgvalues = [25.4,102.1]
@@ -63,10 +59,10 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
         sims = simulate(propTime,Wp,zmer,collect(0:τ[]:T),par,Rad,wpInit,endWpTime,
         wpEnd=wpEnd,startTime=startWpTime,wallCollideDo="random",eachStepDo ="random")
 
-        depthHistogramAnim(sims,par,colPalette = :cool,fps=60,videoName=wdir("animation/3D/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/depthHistogramAnim.mp4",minimum = true,colors=colors)
-        depthHistogramAnim(sims,par,colPalette = :cool,fps=60,videoName=wdir("animation/3D/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/positionHistogramAnim.mp4",minimum = false,colors=colors)
+        depthHistogramAnim(sims,par,colPalette = :cool,fps=60,secs=30,videoName=wdir("animation/3D/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/depthHistogramAnim.mp4",minimum = true,colors=colors)
+        depthHistogramAnim(sims,par,colPalette = :cool,fps=60,secs=30,videoName=wdir("animation/3D/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/positionHistogramAnim.mp4",minimum = false,colors=colors)
 
-        anim2D(sims,par,τ,radicalRadius=0.75,fps=60,videoName=wdir("animation/3D/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/3DTo2dAnim.mp4",
+        anim2D(sims,par,τ,radicalRadius=0.75,fps=60,secs=30,videoName=wdir("animation/3D/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/3DTo2dAnim.mp4",
         C = colors)
         # anim3D(sims,par,radicalRadius=0.75,fps=60,videoName=wdir("animation/3D/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/Makie3Danimation.mp4",radC=colors)
 
