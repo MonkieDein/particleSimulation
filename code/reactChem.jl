@@ -56,21 +56,21 @@ mutable struct Radicle
     τ :: Observable{Float64} # Global Time step
     σx :: Observable{Float64} # Mean square displacement of each axis
     l :: Observable{Int} # layer index
-    function Radicle(x,y,z,par;r=0,zmer = Node(1),τ = Node(0.01))
-        l = Node( searchsortedlast(par.layerR[], L2Distance( [x,y,z],vec(par.obj.p) ) ) )
+    function Radicle(x,y,z,par;r=0,zmer = Observable(1),τ = Observable(0.01))
+        l = Observable( searchsortedlast(par.layerR[], L2Distance( [x,y,z],vec(par.obj.p) ) ) )
         D = @lift( $(par.layerD)[$l]/($zmer^(0.5+1.75*$(par.Wp) )) ) 
         # lift is not used in "σx" because "obj.v" is depend on the previous "σx". 
-        σx = Node(sqrt( 2 * D[] / τ[]))
+        σx = Observable(sqrt( 2 * D[] / τ[]))
         obj = Round([x,y,z],r,V=[σx[],0.0,0.0])
         autoUpdateRadVelocity(D,obj,σx,τ)
         new(obj,D,zmer,τ,σx,l)
     end
-    function Radicle(P,par;r=0,l = Node(1),zmer = Node(1),τ = Node(0.01))
-        l = Node( searchsortedlast(par.layerR[], L2Distance( P,vec(par.obj.p) ) ) )
+    function Radicle(P,par;r=0,l = Observable(1),zmer = Observable(1),τ = Observable(0.01))
+        l = Observable( searchsortedlast(par.layerR[], L2Distance( P,vec(par.obj.p) ) ) )
         D = @lift( $(par.layerD)[$l]/($zmer^(0.5+1.75*$(par.Wp) )) ) 
         # lift is not used in "σx" because "obj.v" is depend on the previous "σx". 
         # need an ObservableFunction to auto update radicle "velocity" and "σx".
-        σx = Node(sqrt( 2 * D[] / τ[]))
+        σx = Observable(sqrt( 2 * D[] / τ[]))
         obj = Round(P,r,V=[σx[],0.0,0.0])
         autoUpdateRadVelocity(D,obj,σx,τ)
         new(obj,D,zmer,τ,σx,l)

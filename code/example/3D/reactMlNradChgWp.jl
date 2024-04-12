@@ -22,7 +22,7 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
 
     # --- Make particle observable function --- 
     layerR = Observable(layerRadius)                                # layerR : layer Radius away from center)
-    Wp = Node(wpInit)                                               # Wp : Weightage of polymer
+    Wp = Observable(wpInit)                                               # Wp : Weightage of polymer
     layerΔT = Observable(reactionTemp .- Tg₀)                       # layerΔT = T - Tg # (@lift(reactionTemp .- updateTg($Wp,Tg₀,Tmon)) )
     layerD = @lift([10^logD($Wp,t,unit="nm") for t in $layerΔT])    # Layers Diffusion coefficient
     par = mLparticle(parRadius,Wp,layerR,layerΔT,layerD)                                
@@ -37,8 +37,8 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
     # initialize Radicles
     zmerInit = 4
     maxStepLength = 50 # minimum(diff(par.layerR[])) # 40 #
-    zmer = Node(zmerInit)
-    τ =   Node(T/1000) # Node(MinTimeForStepsize(maxStepLength,par.layerD[],wpInit,zmerInit,confident=0.9)  ) #
+    zmer = Observable(zmerInit)
+    τ =   Observable(T/1000) # Observable(MinTimeForStepsize(maxStepLength,par.layerD[],wpInit,zmerInit,confident=0.9)  ) #
     radRadius = 0.75
     Rad = [Radicle([par.obj.radius-radRadius*(1+1e-10),0,0],par,r=radRadius,zmer = zmer,τ = τ) for n in 1:N]
     for rad in Rad
