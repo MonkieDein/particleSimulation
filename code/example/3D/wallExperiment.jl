@@ -13,7 +13,7 @@ colorpalletes = palette(:cool, length(Tgvalues))
 
 # Multi Layer Particle variables
 wpInit , wpEnd = 0.8 , 1.0                                      # initial Wp values
-startWpTime , endWpTime = 0.0 , 0.02                            # linear Relationship Wp reaction end Time
+startWpTime , endWpTime = 0.0 , 30*60.0                         # linear Relationship Wp reaction end Time
 parRadius = layerRadisArray[length(layerRadisArray)]            # 70 # particle radius
 reactionTemp = 70                                               # T : Reaction Temparature (°C)
 Tg₀ = Tgvalues[TgIndexes] #  [10,90,20,100,30]                  # initial Tg

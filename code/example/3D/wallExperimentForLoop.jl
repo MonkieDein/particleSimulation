@@ -7,13 +7,14 @@ this experiments
 
 """
 using StatsBase
-
+wpInitsArray = [0.783,0.822,0.858,0.887,0.893,0.909,0.919,0.926,0.936]
 zave1 = [0, 129.4 , 132.4 , 141.1 , 149.6 , 154.3 , 156.1 , 161.7 , 164.7 , 169.3 , 173.7 ] ./ 2
 zave2 = [0, 129.4 , 135.7 , 141.2 , 148.4 , 151.3 , 155.9 , 160.0 , 163.5 , 171.8 , 173.8 ] ./ 2
 zave3 = [0, 129.4 , 138.1 , 148.8 , 153.2 , 159.4 , 166.0 , 169.7 , 170.3 , 167.2 , 175.6 ] ./ 2
 
 overallLayerRadisArray = (zave1 .+ zave2 .+ zave3) ./ 3 #round.(Int,)
 Tgvalues = [25.4,102.1]
+for wpInit in wpInitsArray
 for totalLayer in 1:10
 for glossy in 0:totalLayer
     println("running total $totalLayer and glossy at $glossy")
@@ -26,8 +27,8 @@ for glossy in 0:totalLayer
 
     colorpalletes = palette(:cool, length(Tgvalues))
     # Multi Layer Particle variables
-    wpInit , wpEnd = 0.8 , 1.0                                      # initial Wp values
-    startWpTime , endWpTime = 0.0 , 0.02                            # linear Relationship Wp reaction end Time
+    wpEnd = 1.0                                                     # initial Wp values
+    startWpTime , endWpTime = 0.0 , 30*60.0                         # linear Relationship Wp reaction end Time
     parRadius = layerRadisArray[length(layerRadisArray)]            # 70 # particle radius
     reactionTemp = 70                                               # T : Reaction Temparature (°C)
     Tg₀ = Tgvalues[TgIndexes] #  [10,90,20,100,30]                  # initial Tg
@@ -43,7 +44,7 @@ for glossy in 0:totalLayer
     par = mLparticle(parRadius,Wp,layerR,layerΔT,layerD)     
                                 
     # Simulation propagation Time statistics
-    lPropl = 5                                                                          # Number of propagation steps before simulation end
+    lPropl = 297                                                                          # Number of propagation steps before simulation end
     propTime = @lift(propagationTimeInterval($(par.Wp),reactionTemp))                   # propTime : Time Interval for Monomer to propagate
     propStats = getPropStats(wpInit,reactionTemp,endWpTime,lPropl,
                                 wpEnd = wpEnd, startTime=startWpTime)                   # get propagation statistics
@@ -87,4 +88,4 @@ for glossy in 0:totalLayer
     savefig(his,wdir("plots/MlayerChgWp/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/DeepestHistogram.png")
 end
 end
-
+end
