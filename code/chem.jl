@@ -118,9 +118,9 @@ end
 
 
 # Propagation Time for Monomer
-function propagationTimeInterval(Wp,TempInC)
+function propagationTimeInterval(Wp,TempInC;Mw = 142.2  )
     R = 8.314;                                              # Gas Constant (J/(K * mol))
-    Mw = 100                                                # Molecule weight (g/mol) ! 
+    Mw = Mw                                                 # Molecule weight (g/mol) ! 
     M = ((1-Wp)/Mw)*1000;                                   # Monomer concentration (mol/g) !
     k_p = (2.673e6)*exp(-22.36e3/(R * °C2K(TempInC)));      # Propagation Coefficient ( L/(mol*s) )
     propTime = 1/(k_p * M);                                 # Propagation Time

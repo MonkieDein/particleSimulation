@@ -1,5 +1,5 @@
-include("../../reactChem.jl")
-include("../../reactStatsPlots.jl")
+include("../../../reactChem.jl")
+include("../../../reactStatsPlots.jl")
 using StatsBase
 
 layerRadisArray = [0 ,64.7, 67.7, 71.85, 75.2, 77.5, 79.7, 81.9, 83.08, 84.72, 87.18 ]

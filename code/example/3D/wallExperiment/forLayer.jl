@@ -1,5 +1,5 @@
-include("../../reactChem.jl")
-include("../../reactStatsPlots.jl")
+include("../../../reactChem.jl")
+include("../../../reactStatsPlots.jl")
 using StatsBase
 
 

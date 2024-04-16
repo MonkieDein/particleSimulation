@@ -354,6 +354,29 @@ end
 #     return(plt)
 # end
 
+function addToDict(d, wpInit,totalLayer, glossy,value)
+    if !(string(wpInit) in keys(d))
+        d[string(wpInit)] = Dict()
+    end
+    if !(string(totalLayer) in keys(d[string(wpInit)]))
+        d[string(wpInit)][string(totalLayer)] = Dict()
+    end
+    d[string(wpInit)][string(totalLayer)][string(glossy)] = value
+end
+
+function check_path(path::AbstractString)
+    directory = join(split(path, "/")[begin:end-1],"/")
+    if (directory != "") && (!isdir(directory))  # Check if the directory does not exist
+        mkpath(directory) 
+    end
+    return path
+end
+
+function save_jld(filename,object)
+    check_path(filename)
+    save(filename,object)
+end
+
 function wdir(folder)
     if !isempty(folder) && !ispath(folder)
         println("Create directory ("*folder*")!")

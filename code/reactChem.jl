@@ -162,9 +162,9 @@ function multiLbounceStepUpdate(particle::mLparticle,radicle::Radicle,Δt;postTr
 end
 
 # Propagation Time for Monomer
-function propagationTimeInterval(Wp,TempInC)
+function propagationTimeInterval(Wp,TempInC;Mw = 142.2  )
     R = 8.314;                                              # Gas Constant (J/(K * mol))
-    Mw = 100                                                # Molecule weight (g/mol) ! 
+    Mw = Mw                                                # Molecule weight (g/mol) ! 
     M = ((1-Wp)/Mw)*1000;                                   # Monomer concentration (mol/g) !
     k_p = (2.673e6)*exp(-22.36e3/(R * °C2K(TempInC)));      # Propagation Coefficient ( L/(mol*s) )
     propTime = 1/(k_p * M);                                 # Propagation Time
@@ -181,18 +181,18 @@ function wpPiecewiseLinear(wpInit , endTime, curTime ; wpEnd = 1.0, startTime=0.
     end
 end
 
-function getPropStats(wpInit,reactionTemp,endTime,nProp; wpEnd = 1.0, startTime=0.0)
-    totalTime = 0
+function getPropStats(wpInit,reactionTemp,endTime,nProp; wpEnd = 1.0, startTime=0.0,currentTime = 0.0)
     times = []
     wps = []
-    wp = wpInit
+    wp = wpPiecewiseLinear(wpInit,endTime,currentTime,wpEnd=wpEnd,startTime=startTime)
     for prop in 1:nProp
         push!(wps,wp)
-        push!(times,propagationTimeInterval(wp,reactionTemp))
-        totalTime = totalTime + propagationTimeInterval(wp,reactionTemp)
-        wp = wpPiecewiseLinear(wpInit,endTime,totalTime,wpEnd=wpEnd,startTime=startTime)
+        propTime = propagationTimeInterval(wp,reactionTemp)
+        push!(times,propTime)
+        currentTime = currentTime + propTime
+        wp = wpPiecewiseLinear(wpInit,endTime,currentTime,wpEnd=wpEnd,startTime=startTime)
     end
-    return (wps=wps,times=times,T=totalTime)
+    return (wps=wps,times=times,T=currentTime)
 end
 
 #TODO: need to figure out how to get total time elapsed
