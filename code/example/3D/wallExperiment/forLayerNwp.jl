@@ -29,7 +29,7 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
 
         deepest_v = []
         totalWpTime = 30*60.0
-        for elapse_min in [15]#0:29
+        for elapse_min in 0:29
             wpEnd = 1.0                                                     # initial Wp values
             startWpTime , remainWpTime = 0.0 , (totalWpTime - elapse_min*60.0) # linear Relationship Wp reaction end Time
             cur_wp = wpPiecewiseLinear(wpInit,totalWpTime,elapse_min*60.0,wpEnd=wpEnd,startTime=startWpTime)
