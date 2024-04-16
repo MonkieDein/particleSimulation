@@ -75,7 +75,7 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
         v = info.sortedValues[size(info.sortedValues)[1],:]
         num_bins = max(1,Int(floor(maximum(v) - minimum(v))))
         his = Plots.histogram(v, normalize=true,bins=num_bins,xticks=0:5:layerRadisArray[length(layerRadisArray)],
-        ytick=0:0.1:1.0,ylim=(0,1.0),xlim=(0,layerRadisArray[length(layerRadisArray)]))
+        ytick=0:0.1:1.0,ylim=(0,1.0),xlim=(0,overallLayerRadisArray[end]))
 
         savefig(his,wdir("plots/MlayerChgWp/wallExp/$wpInit/total$totalLayer/glossy$glossy")*"/DeepestHistogram.png")
     end
