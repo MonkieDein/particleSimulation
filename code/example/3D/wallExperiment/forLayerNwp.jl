@@ -28,10 +28,11 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
         layerRadius = layerRadisArray[1:(length(layerRadisArray)-1)]
 
         deepest_v = []
-        for elapse_min in 0:29
-            wpEnd = 1.0                                                 # initial Wp values
-            startWpTime , endWpTime = 0.0 , (30-elapse_min)*60.0        # linear Relationship Wp reaction end Time
-            cur_wp = wpPiecewiseLinear(wpInit,endWpTime,elapse_min*60.0,wpEnd=wpEnd,startTime=startWpTime)
+        totalWpTime = 30*60.0
+        for elapse_min in [15]#0:29
+            wpEnd = 1.0                                                     # initial Wp values
+            startWpTime , remainWpTime = 0.0 , (totalWpTime - elapse_min*60.0) # linear Relationship Wp reaction end Time
+            cur_wp = wpPiecewiseLinear(wpInit,totalWpTime,elapse_min*60.0,wpEnd=wpEnd,startTime=startWpTime)
             N = (30 - elapse_min)*10                                    # N : NumberOfRadical (assume to have linear relationship with remain time)
             # --- Make particle observable function --- 
             layerR = Observable(layerRadius)                                # layerR : layer Radius away from center)
@@ -43,7 +44,7 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
             # Simulation propagation Time statistics
             lPropl = 297                                                                          # Number of propagation steps before simulation end
             propTime = @lift(propagationTimeInterval($(par.Wp),reactionTemp))                   # propTime : Time Interval for Monomer to propagate
-            propStats = getPropStats(cur_wp,reactionTemp,endWpTime,lPropl,
+            propStats = getPropStats(cur_wp,reactionTemp,remainWpTime,lPropl,
                                         wpEnd = wpEnd, startTime=startWpTime)                   # get propagation statistics
             T = propStats.T                                                                     # T        : Total simulation time interval
 
@@ -57,9 +58,9 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
             for rad in Rad
                 random_position(rad.obj) 
             end
-
+            println("wp $(Wp[]), zmer $(zmer[]), tau $(τ[]), T $T, cur_wp $cur_wp, startTime $startWpTime,remainTime $remainWpTime")
             # Run simulations
-            sims = simulate(propTime,Wp,zmer,collect(0:τ[]:T),par,Rad,cur_wp,endWpTime,
+            sims = simulate(propTime,Wp,zmer,collect(0:τ[]:T),par,Rad,cur_wp,remainWpTime,
             wpEnd=wpEnd,startTime=startWpTime,wallCollideDo="random",eachStepDo ="random")
 
             info = getTimeMinMatrix(sims,par.obj.radius,Vars=sims.minDepth)
