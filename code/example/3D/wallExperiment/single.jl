@@ -2,7 +2,7 @@ include("../../../reactChem.jl")
 include("../../../reactStatsPlots.jl")
 using StatsBase
 
-layerRadisArray = [0 ,64.7, 67.7, 71.85, 75.2, 77.5, 79.7, 81.9, 83.08, 84.72, 87.18 ]
+wpInitsArray = [0.6916,0.7672,0.8115,0.8408,0.862,0.8797,0.892,0.9034,0.9098]
 Tgvalues = [25.4,102.1]
 TgIndexes = [1;1;1;1;1;1;1;1;2;1]
 colorpalletes = palette(:cool, length(Tgvalues))
