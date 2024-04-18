@@ -6,11 +6,15 @@ using StatsBase
 wpInitsArray = [0.6916,0.7672,0.8115,0.8408,0.862,0.8797,0.892,0.9034,0.9098]
 overallLayerRadisArray = [0 ,64.7, 67.7, 71.85, 75.2, 77.5, 79.7, 81.9, 83.08, 84.72, 87.18 ]
 Tgvalues = [25.4,102.1]
+reactionTemp = 80                                               # T : Reaction Temparature (°C)
 
 result = Dict()
 for (nwp,wpInit) in enumerate(wpInitsArray)
     totalLayer =  nwp + 1                                       # respective Layer
     for glossy in 0:totalLayer
+        overall_plot_files = wdir("plots/MlayerChgWp/wallExp/$wpInit-$reactionTemp/total$totalLayer/glossy$glossy")*"/overall-DeepestHistogram.png"
+        isfile(overall_plot_files) && continue # if the plot exist then continue without overwriting it
+
         println("running total $totalLayer and glossy at $glossy")
         layerRadisArray = overallLayerRadisArray[1:(totalLayer + 1)]
         TgIndexes = fill(1,totalLayer)
@@ -21,7 +25,6 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
         # Multi Layer Particle variables
         colorpalletes = palette(:cool, length(Tgvalues))
         parRadius = layerRadisArray[length(layerRadisArray)]            # particle radius
-        reactionTemp = 80                                               # T : Reaction Temparature (°C)
         Tg₀ = Tgvalues[TgIndexes] #  [10,90,20,100,30]                  # initial Tg
         colors = colorpalletes[TgIndexes]
         Tmon = 106                                                      # monomer temp 106°C
