@@ -7,8 +7,8 @@ wpInitsArray = [0.6916,0.7672,0.8115,0.8408,0.862,0.8797,0.892,0.9034,0.9098]
 overallLayerRadisArray = [0 ,64.7, 67.7, 71.85, 75.2, 77.5, 79.7, 81.9, 83.08, 84.72, 87.18 ]
 Tgvalues = [25.4,102.1]
 reactionTemp = 80                                               # T : Reaction Temparature (°C)
-
-result = Dict()
+data_file = "data/wallExperiment.jld"
+result = init_jld(data_file)
 for (nwp,wpInit) in enumerate(wpInitsArray)
     totalLayer =  nwp + 1                                       # respective Layer
     for glossy in 0:totalLayer
@@ -76,6 +76,7 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
             savefig(his,wdir("plots/MlayerChgWp/wallExp/$wpInit-$reactionTemp/total$totalLayer/glossy$glossy")*"/elapse_$elapse_min-DeepestHistogram.png")
         end
         addToDict(result,wpInit,totalLayer,glossy,deepest_v)
+        save_jld(data_file,result)
         v = reduce(vcat,deepest_v)
         num_bins = max(1,Int(floor(maximum(v) - minimum(v))))
         his = Plots.histogram(v, normalize=true,bins=num_bins,xticks=0:5:layerRadisArray[end],
@@ -83,5 +84,4 @@ for (nwp,wpInit) in enumerate(wpInitsArray)
         savefig(his,wdir("plots/MlayerChgWp/wallExp/$wpInit-$reactionTemp/total$totalLayer/glossy$glossy")*"/overall-DeepestHistogram.png")
     end
 end
-save_jld("data/wallExperiment.jld",result)
 

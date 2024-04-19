@@ -372,9 +372,21 @@ function check_path(path::AbstractString)
     return path
 end
 
+function init_jld(filename)
+    if isfile(filename)
+        return load(filename)
+    else 
+        return Dict()
+    end
+end
+
 function save_jld(filename,object)
     check_path(filename)
     save(filename,object)
+end
+
+function load_jld(filename)
+    return load(filename)
 end
 
 function wdir(folder)
