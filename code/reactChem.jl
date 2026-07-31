@@ -195,7 +195,6 @@ function getPropStats(wpInit,reactionTemp,endTime,nProp; wpEnd = 1.0, startTime=
     return (wps=wps,times=times,T=currentTime)
 end
 
-#TODO: need to figure out how to get total time elapsed
 function simulate(propTime::Observable{Float64},Wp::Observable{Float64},
     zmer::Observable{Int},Time,par::mLparticle,Rad::Vector{Radicle},
     wpInit::Float64,linReactEndTime::Float64;
@@ -210,7 +209,7 @@ function simulate(propTime::Observable{Float64},Wp::Observable{Float64},
     vel = Array{coord}(undef, (lTl,N))     
     zmers = zeros(Int,(lTl,N))
     minDepth = zeros(Float64,(lTl,N)) .+ par.obj.radius
-    tnextP = propTime[]
+    tnextP = propTime[] # this propagation time change whenever Wp change
 
     for (i,t) in ProgressBar(enumerate(Time))
         # ------ Collect Statistics -----
@@ -244,7 +243,7 @@ function simulate(propTime::Observable{Float64},Wp::Observable{Float64},
             # ----- radicle undergo propagation -----
             Wp[] = wpPiecewiseLinear(wpInit,linReactEndTime,tnextP,wpEnd=wpEnd,startTime=startTime)
             zmer[] += 1
-            tnextP += propTime[]
+            tnextP += propTime[] 
         end
         # ----- udpate position after propagation -----
         for (j,rad) in enumerate(Rad)
